@@ -1,0 +1,590 @@
+# =============================================================================
+# Cortex Analyst Semantic Model
+# Vulcan Materials Revenue Forecast Platform
+# =============================================================================
+
+name: vulcan_revenue_model
+description: >
+  Semantic model for Vulcan Materials revenue forecasting and analysis.
+  Enables natural language queries about shipment volumes, pricing, margins,
+  weather impacts, and Monte Carlo forecast results. Supports the "Hidden Discovery"
+  pattern detection for systemic risk identification.
+
+tables:
+  # ============================================
+  # MONTHLY_SHIPMENTS - Primary volume data
+  # ============================================
+  - name: monthly_shipments
+    description: Monthly aggregate shipment volumes by region and customer segment.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: MONTHLY_SHIPMENTS
+    primary_key:
+      columns: [REGION_CODE, PRODUCT_SEGMENT_CODE, CUSTOMER_SEGMENT_CODE, YEAR_MONTH]
+
+    dimensions:
+      - name: region_code
+        synonyms: ["region", "market", "geography", "territory"]
+        description: Geographic sales region (TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS).
+        expr: REGION_CODE
+        data_type: TEXT
+        sample_values: ["TEXAS", "SOUTHEAST", "FLORIDA", "CALIFORNIA", "VIRGINIA", "ILLINOIS"]
+
+      - name: product_segment
+        synonyms: ["product", "material", "aggregate type"]
+        description: Product segment code.
+        expr: PRODUCT_SEGMENT_CODE
+        data_type: TEXT
+        sample_values: ["AGG_STONE", "AGG_SAND", "ASPHALT_MIX", "CONCRETE_RMX"]
+
+      - name: customer_segment
+        synonyms: ["customer", "end market", "sector"]
+        description: Customer segment (public/private breakdown).
+        expr: CUSTOMER_SEGMENT_CODE
+        data_type: TEXT
+        sample_values: ["PUBLIC_HIGHWAY", "PRIVATE_COMMERCIAL", "PRIVATE_RESIDENTIAL"]
+
+    time_dimensions:
+      - name: year_month
+        synonyms: ["month", "period", "date"]
+        description: Month of the shipment data.
+        expr: YEAR_MONTH
+        data_type: DATE
+
+      - name: fiscal_quarter
+        synonyms: ["quarter", "qtr"]
+        description: Fiscal quarter derived from month.
+        expr: |
+          'Q' || CEIL(MONTH(YEAR_MONTH) / 3.0)::VARCHAR
+        data_type: TEXT
+
+      - name: fiscal_year
+        synonyms: ["year", "FY"]
+        description: Fiscal year.
+        expr: YEAR(YEAR_MONTH)
+        data_type: NUMBER
+
+    facts:
+      - name: shipment_tons
+        synonyms: ["volume", "tons", "tonnage", "shipments"]
+        description: Total tons shipped in the period.
+        expr: SHIPMENT_TONS
+        data_type: NUMBER
+
+      - name: revenue_usd
+        synonyms: ["revenue", "sales", "dollars"]
+        description: Total revenue in USD.
+        expr: REVENUE_USD
+        data_type: NUMBER
+
+      - name: price_per_ton
+        synonyms: ["price", "asp", "unit price"]
+        description: Average selling price per ton.
+        expr: PRICE_PER_TON
+        data_type: NUMBER
+
+      - name: weather_impact_days
+        synonyms: ["weather days", "lost days"]
+        description: Days lost to weather in the month.
+        expr: WEATHER_IMPACT_DAYS
+        data_type: NUMBER
+
+    metrics:
+      - name: total_tons
+        synonyms: ["total volume", "total shipments"]
+        description: Sum of all tons shipped.
+        expr: SUM(monthly_shipments.SHIPMENT_TONS)
+
+      - name: total_revenue
+        synonyms: ["total sales"]
+        description: Sum of all revenue.
+        expr: SUM(monthly_shipments.REVENUE_USD)
+
+      - name: avg_price
+        synonyms: ["average price", "realized price"]
+        description: Average price per ton.
+        expr: SUM(monthly_shipments.REVENUE_USD) / NULLIF(SUM(monthly_shipments.SHIPMENT_TONS), 0)
+
+      - name: yoy_volume_growth
+        description: Year-over-year volume growth percentage.
+        expr: AVG(monthly_shipments.YOY_VOLUME_CHANGE_PCT)
+
+  # ============================================
+  # MONTHLY_PRICING - Pricing and margins
+  # ============================================
+  - name: monthly_pricing
+    description: Monthly pricing and margin metrics by region.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: MONTHLY_PRICING
+    primary_key:
+      columns: [REGION_CODE, PRODUCT_SEGMENT_CODE, YEAR_MONTH]
+
+    dimensions:
+      - name: region_code
+        synonyms: ["region", "market"]
+        description: Geographic sales region.
+        expr: REGION_CODE
+        data_type: TEXT
+
+    time_dimensions:
+      - name: year_month
+        synonyms: ["month", "period"]
+        description: Month of the pricing data.
+        expr: YEAR_MONTH
+        data_type: DATE
+
+    facts:
+      - name: freight_adjusted_price
+        synonyms: ["fob price", "net price", "realized price"]
+        description: Freight-adjusted price per ton (key Vulcan metric).
+        expr: FREIGHT_ADJUSTED_PRICE
+        data_type: NUMBER
+
+      - name: cash_gross_profit_per_ton
+        synonyms: ["cash gp", "margin per ton", "unit margin"]
+        description: Cash gross profit per ton (excludes D&D).
+        expr: CASH_GROSS_PROFIT_PER_TON
+        data_type: NUMBER
+
+      - name: cash_cost_per_ton
+        synonyms: ["unit cost", "cost per ton"]
+        description: Cash cost per ton.
+        expr: CASH_COST_PER_TON
+        data_type: NUMBER
+
+      - name: yoy_price_change
+        synonyms: ["price increase", "price growth"]
+        description: Year-over-year price change percentage.
+        expr: YOY_PRICE_CHANGE_PCT
+        data_type: NUMBER
+
+    metrics:
+      - name: avg_cash_gp
+        synonyms: ["average margin"]
+        description: Average cash gross profit per ton.
+        expr: AVG(monthly_pricing.CASH_GROSS_PROFIT_PER_TON)
+
+      - name: margin_pct
+        description: Gross margin percentage.
+        expr: AVG(monthly_pricing.CASH_GROSS_PROFIT_PER_TON / NULLIF(monthly_pricing.FREIGHT_ADJUSTED_PRICE, 0)) * 100
+
+  # ============================================
+  # SALES_REGION - Region reference data
+  # ============================================
+  - name: sales_regions
+    description: Sales region reference table with capacity and reserves.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: SALES_REGION
+    primary_key:
+      columns: [REGION_CODE]
+
+    dimensions:
+      - name: region_code
+        synonyms: ["region"]
+        description: Region code.
+        expr: REGION_CODE
+        data_type: TEXT
+
+      - name: region_name
+        synonyms: ["name"]
+        description: Full region name.
+        expr: REGION_NAME
+        data_type: TEXT
+
+      - name: primary_states
+        synonyms: ["states"]
+        description: States in the region.
+        expr: ARRAY_TO_STRING(PRIMARY_STATES, ', ')
+        data_type: TEXT
+
+    facts:
+      - name: total_reserves
+        synonyms: ["reserves", "rock reserves"]
+        description: Total proven and probable reserves in tons.
+        expr: TOTAL_RESERVES_TONS
+        data_type: NUMBER
+
+      - name: annual_capacity
+        synonyms: ["capacity"]
+        description: Annual production capacity in tons.
+        expr: ANNUAL_CAPACITY_TONS
+        data_type: NUMBER
+
+  # ============================================
+  # DAILY_COMMODITY_PRICES - Input costs
+  # ============================================
+  - name: commodity_prices
+    description: Daily commodity price data for key inputs.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: DAILY_COMMODITY_PRICES
+    primary_key:
+      columns: [PRICE_DATE]
+
+    time_dimensions:
+      - name: price_date
+        synonyms: ["date"]
+        description: Date of the price observation.
+        expr: PRICE_DATE
+        data_type: DATE
+
+    facts:
+      - name: diesel_price
+        synonyms: ["diesel", "fuel price"]
+        description: Diesel price (Gulf Coast) in $/gallon.
+        expr: DIESEL_GULF_COAST
+        data_type: NUMBER
+
+      - name: liquid_asphalt
+        synonyms: ["asphalt", "AC price"]
+        description: Liquid asphalt cement price in $/ton.
+        expr: LIQUID_ASPHALT_GULF
+        data_type: NUMBER
+
+      - name: cement_ppi
+        synonyms: ["cement", "cement index"]
+        description: Cement Producer Price Index.
+        expr: CEMENT_PPI
+        data_type: NUMBER
+
+      - name: natural_gas
+        synonyms: ["gas", "nat gas"]
+        description: Natural gas price (Henry Hub) in $/MMBtu.
+        expr: NATURAL_GAS_HENRY_HUB
+        data_type: NUMBER
+
+    metrics:
+      - name: avg_diesel
+        description: Average diesel price.
+        expr: AVG(commodity_prices.DIESEL_GULF_COAST)
+
+      - name: avg_asphalt
+        description: Average liquid asphalt price.
+        expr: AVG(commodity_prices.LIQUID_ASPHALT_GULF)
+
+  # ============================================
+  # REVENUE_FORECAST - Monte Carlo predictions
+  # ============================================
+  - name: revenue_forecast
+    description: Monte Carlo simulation revenue forecasts.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: REVENUE_FORECAST
+    primary_key:
+      columns: [FORECAST_ID]
+
+    dimensions:
+      - name: region_code
+        synonyms: ["region"]
+        description: Region for the forecast.
+        expr: REGION_CODE
+        data_type: TEXT
+
+      - name: forecast_horizon
+        synonyms: ["horizon", "period"]
+        description: Forecast horizon (Q1, Q2, etc.).
+        expr: FORECAST_HORIZON
+        data_type: TEXT
+
+    time_dimensions:
+      - name: forecast_date
+        synonyms: ["as of date"]
+        description: Date the forecast was generated.
+        expr: FORECAST_DATE
+        data_type: DATE
+
+    facts:
+      - name: predicted_revenue
+        synonyms: ["forecast revenue", "expected revenue"]
+        description: Predicted revenue in USD.
+        expr: PREDICTED_REVENUE_USD
+        data_type: NUMBER
+
+      - name: predicted_volume
+        synonyms: ["forecast volume", "expected tons"]
+        description: Predicted shipment volume in tons.
+        expr: PREDICTED_VOLUME_TONS
+        data_type: NUMBER
+
+      - name: predicted_ebitda
+        synonyms: ["forecast ebitda"]
+        description: Predicted EBITDA in USD.
+        expr: PREDICTED_EBITDA_USD
+        data_type: NUMBER
+
+      - name: predicted_margin
+        synonyms: ["forecast margin"]
+        description: Predicted margin percentage.
+        expr: PREDICTED_MARGIN_PCT
+        data_type: NUMBER
+
+      - name: ci_low
+        synonyms: ["lower bound", "downside"]
+        description: 95% confidence interval lower bound.
+        expr: CONFIDENCE_INTERVAL_LOW
+        data_type: NUMBER
+
+      - name: ci_high
+        synonyms: ["upper bound", "upside"]
+        description: 95% confidence interval upper bound.
+        expr: CONFIDENCE_INTERVAL_HIGH
+        data_type: NUMBER
+
+      - name: p5
+        synonyms: ["5th percentile", "worst case"]
+        description: 5th percentile outcome.
+        expr: PERCENTILE_5
+        data_type: NUMBER
+
+      - name: p50
+        synonyms: ["median", "base case"]
+        description: 50th percentile (median) outcome.
+        expr: PERCENTILE_50
+        data_type: NUMBER
+
+      - name: p95
+        synonyms: ["95th percentile", "best case"]
+        description: 95th percentile outcome.
+        expr: PERCENTILE_95
+        data_type: NUMBER
+
+      - name: var_95
+        synonyms: ["value at risk", "var"]
+        description: 95% Value at Risk.
+        expr: VALUE_AT_RISK_95
+        data_type: NUMBER
+
+    metrics:
+      - name: expected_revenue
+        description: Expected (mean) revenue forecast.
+        expr: AVG(revenue_forecast.PREDICTED_REVENUE_USD)
+
+      - name: forecast_range
+        description: Width of 95% confidence interval.
+        expr: AVG(revenue_forecast.CONFIDENCE_INTERVAL_HIGH - revenue_forecast.CONFIDENCE_INTERVAL_LOW)
+
+  # ============================================
+  # HIDDEN_PATTERN - Systemic risk detection
+  # ============================================
+  - name: hidden_patterns
+    description: Detected systemic patterns and risks.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: HIDDEN_PATTERN
+    primary_key:
+      columns: [PATTERN_ID]
+
+    dimensions:
+      - name: pattern_type
+        synonyms: ["type", "category"]
+        description: Type of hidden pattern.
+        expr: PATTERN_TYPE
+        data_type: TEXT
+        sample_values: ["COST_CORRELATION", "WEATHER_CLUSTERING", "DEMAND_SHIFT"]
+
+      - name: pattern_name
+        synonyms: ["name", "pattern"]
+        description: Name of the pattern.
+        expr: PATTERN_NAME
+        data_type: TEXT
+
+      - name: severity
+        synonyms: ["risk level", "priority"]
+        description: Severity of the pattern.
+        expr: SEVERITY
+        data_type: TEXT
+        sample_values: ["HIGH", "MEDIUM", "LOW"]
+
+      - name: status
+        description: Current status.
+        expr: STATUS
+        data_type: TEXT
+
+    facts:
+      - name: annual_impact
+        synonyms: ["impact", "exposure"]
+        description: Estimated annual financial impact in USD.
+        expr: ESTIMATED_ANNUAL_IMPACT_USD
+        data_type: NUMBER
+
+      - name: confidence
+        synonyms: ["statistical significance"]
+        description: Statistical confidence of the pattern (0-1).
+        expr: STATISTICAL_SIGNIFICANCE
+        data_type: NUMBER
+
+    metrics:
+      - name: total_exposure
+        description: Total annual exposure from all patterns.
+        expr: SUM(hidden_patterns.ESTIMATED_ANNUAL_IMPACT_USD)
+
+      - name: high_severity_count
+        description: Count of high severity patterns.
+        expr: SUM(CASE WHEN hidden_patterns.SEVERITY = 'HIGH' THEN 1 ELSE 0 END)
+
+# ============================================
+# RELATIONSHIPS
+# ============================================
+relationships:
+  - name: shipments_to_pricing
+    left_table: monthly_shipments
+    right_table: monthly_pricing
+    relationship_columns:
+      - left_column: REGION_CODE
+        right_column: REGION_CODE
+      - left_column: YEAR_MONTH
+        right_column: YEAR_MONTH
+
+  - name: shipments_to_regions
+    left_table: monthly_shipments
+    right_table: sales_regions
+    relationship_columns:
+      - left_column: REGION_CODE
+        right_column: REGION_CODE
+
+# ============================================
+# VERIFIED QUERIES
+# ============================================
+verified_queries:
+  - name: current_volume_by_region
+    question: "What are current shipments by region?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT 
+        REGION_CODE as region,
+        SUM(SHIPMENT_TONS) as total_tons,
+        SUM(REVENUE_USD) as total_revenue_usd,
+        AVG(PRICE_PER_TON) as avg_price_per_ton
+      FROM __monthly_shipments
+      WHERE YEAR_MONTH >= DATEADD('month', -3, CURRENT_DATE())
+      GROUP BY REGION_CODE
+      ORDER BY total_tons DESC
+
+  - name: ytd_revenue
+    question: "What is year-to-date revenue?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT 
+        YEAR(YEAR_MONTH) as fiscal_year,
+        SUM(REVENUE_USD) / 1e9 as revenue_billions,
+        SUM(SHIPMENT_TONS) / 1e6 as volume_millions_tons,
+        SUM(REVENUE_USD) / NULLIF(SUM(SHIPMENT_TONS), 0) as realized_price_per_ton
+      FROM __monthly_shipments
+      WHERE YEAR_MONTH >= DATE_TRUNC('year', CURRENT_DATE())
+      GROUP BY YEAR(YEAR_MONTH)
+
+  - name: margin_by_region
+    question: "What is the cash gross profit per ton by region?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT 
+        REGION_CODE as region,
+        AVG(FREIGHT_ADJUSTED_PRICE) as avg_price_per_ton,
+        AVG(CASH_GROSS_PROFIT_PER_TON) as cash_gp_per_ton,
+        AVG(CASH_GROSS_PROFIT_PER_TON / NULLIF(FREIGHT_ADJUSTED_PRICE, 0)) * 100 as margin_pct
+      FROM __monthly_pricing
+      WHERE YEAR_MONTH >= DATEADD('month', -6, CURRENT_DATE())
+      GROUP BY REGION_CODE
+      ORDER BY cash_gp_per_ton DESC
+
+  - name: segment_mix
+    question: "What is the customer segment mix?"
+    sql: |
+      SELECT 
+        CUSTOMER_SEGMENT_CODE as segment,
+        SUM(SHIPMENT_TONS) as total_tons,
+        SUM(REVENUE_USD) as total_revenue,
+        SUM(REVENUE_USD) / NULLIF(SUM(SUM(REVENUE_USD)) OVER (), 0) * 100 as revenue_share_pct
+      FROM __monthly_shipments
+      WHERE YEAR_MONTH >= DATEADD('year', -1, CURRENT_DATE())
+      GROUP BY CUSTOMER_SEGMENT_CODE
+      ORDER BY total_revenue DESC
+
+  - name: revenue_forecast
+    question: "What is the revenue forecast?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT 
+        FORECAST_HORIZON,
+        REGION_CODE,
+        PREDICTED_REVENUE_USD / 1e9 as predicted_revenue_b,
+        PERCENTILE_5 / 1e9 as p5_b,
+        PERCENTILE_50 / 1e9 as p50_b,
+        PERCENTILE_95 / 1e9 as p95_b,
+        PREDICTED_MARGIN_PCT
+      FROM __revenue_forecast
+      WHERE FORECAST_DATE = (SELECT MAX(FORECAST_DATE) FROM VULCAN_MATERIALS_DB.ML.REVENUE_FORECAST)
+      ORDER BY FORECAST_HORIZON, REGION_CODE
+
+  - name: hidden_discovery
+    question: "What are the hidden patterns?"
+    sql: |
+      SELECT 
+        PATTERN_NAME,
+        PATTERN_TYPE,
+        SEVERITY,
+        ESTIMATED_ANNUAL_IMPACT_USD / 1e6 as annual_impact_millions,
+        STATISTICAL_SIGNIFICANCE as confidence,
+        ROOT_CAUSE_HYPOTHESIS,
+        RECOMMENDED_ACTION
+      FROM __hidden_patterns
+      WHERE STATUS != 'RESOLVED'
+      ORDER BY ESTIMATED_ANNUAL_IMPACT_USD DESC
+
+  - name: diesel_trend
+    question: "What is the diesel price trend?"
+    sql: |
+      SELECT 
+        DATE_TRUNC('week', PRICE_DATE) as week,
+        AVG(DIESEL_GULF_COAST) as avg_diesel_price,
+        AVG(LIQUID_ASPHALT_GULF) as avg_asphalt_price
+      FROM __commodity_prices
+      WHERE PRICE_DATE >= DATEADD('month', -6, CURRENT_DATE())
+      GROUP BY DATE_TRUNC('week', PRICE_DATE)
+      ORDER BY week DESC
+
+# ============================================
+# CUSTOM INSTRUCTIONS
+# ============================================
+custom_instructions: >
+  This semantic model covers Vulcan Materials revenue forecasting and analysis.
+  
+  Key business context:
+  - Vulcan Materials is the largest US producer of construction aggregates
+  - FY2025: $7.941B revenue, 226.8M tons shipped, $21.98/ton freight-adjusted price
+  - Cash gross profit per ton: $11.33 (key margin metric, excludes D&D)
+  - Regions: TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS
+  - SAC TUN (Mexico) operations suspended - $80-100M annual EBITDA impact
+  
+  Customer Segments:
+  - PUBLIC_HIGHWAY (35%): State DOT projects, IIJA-funded
+  - PRIVATE_RESIDENTIAL (22%): Housing, affected by mortgage rates
+  - PRIVATE_COMMERCIAL (18%): Office, retail, data centers
+  - PUBLIC_OTHER (12%): Municipal infrastructure
+  - PRIVATE_INDUSTRIAL (8%): Manufacturing, reshoring
+  
+  Monte Carlo Forecasting:
+  - Forecasts generated via 10,000+ simulations
+  - Key uncertain variables: volume growth, price growth, diesel/asphalt costs
+  - P5/P50/P95 represent 5th, 50th, 95th percentile outcomes
+  - Value at Risk (VaR) = potential loss at 95% confidence
+  
+  Hidden Discovery Patterns:
+  - COST_CORRELATION: Diesel-asphalt cost double squeeze
+  - WEATHER_CLUSTERING: Seasonal precipitation patterns
+  - DEMAND_SHIFT: Data center aggregate intensity
+  
+  When analyzing:
+  - Volume is seasonal: Q2-Q3 peak, Q1/Q4 trough
+  - Price increases typically 4-5% annually
+  - Weather impacts vary by region (Southeast Q1 rain, Texas summer heat)
+  - Public sector provides stable demand floor
+  - Private sector more cyclical (interest rate sensitive)

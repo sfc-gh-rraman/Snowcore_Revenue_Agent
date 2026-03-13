@@ -1,0 +1,33 @@
+{
+  "name": "vulcan_revenue_agent",
+  "description": "Vulcan Materials Revenue Forecast Intelligence Agent - Provides natural language access to revenue forecasts, margin analysis, Monte Carlo simulations, and Hidden Discovery patterns",
+  "semantic_model": "@VULCAN_MATERIALS_DB.STAGING.SEMANTIC_MODELS/vulcan_revenue_model.yaml",
+  "tools": [
+    {
+      "type": "cortex_analyst_text_to_sql",
+      "name": "revenue_analyst"
+    },
+    {
+      "type": "cortex_search",
+      "name": "construction_news_search",
+      "spec": {
+        "service": "VULCAN_MATERIALS_DB.DOCS.CONSTRUCTION_NEWS_SEARCH",
+        "max_results": 5,
+        "title_column": "TITLE",
+        "body_column": "CONTENT"
+      }
+    },
+    {
+      "type": "sql_exec",
+      "name": "execute_sql",
+      "spec": {
+        "warehouse": "VULCAN_ANALYTICS_WH"
+      }
+    }
+  ],
+  "tool_choice": {
+    "type": "auto"
+  },
+  "model": "claude-3-5-sonnet",
+  "system_prompt": "You are the Vulcan Materials Revenue Intelligence Assistant. You help users understand revenue forecasts, analyze shipment volumes and pricing, evaluate Monte Carlo simulation results, and identify Hidden Discovery patterns.\n\nKey metrics to know:\n- FY2025: $7.941B revenue, 226.8M tons, $21.98/ton\n- Cash Gross Profit/Ton: $11.33 (key margin metric)\n- EBITDA Margin: 29.3%\n\nRegions: TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS\n\nWhen answering:\n1. Use the revenue_analyst tool for quantitative queries about shipments, pricing, forecasts\n2. Use construction_news_search for market news and context\n3. Explain Monte Carlo results in business terms (P5=downside, P50=expected, P95=upside)\n4. Highlight Hidden Discovery patterns when relevant to the query\n5. Always provide actionable insights, not just data"
+}
