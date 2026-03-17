@@ -1,0 +1,481 @@
+{
+  "_meta": {
+    "template_version": "3.1.0",
+    "template_type": "solution_single",
+    "schema": "ISF Solution Template",
+    "workspace_id": "NEW",
+    "industry_id": "IND-MFG",
+    "generated": "2026-03-16T14:45:00.000Z",
+    "version_info": {
+      "major": 3,
+      "minor": 1,
+      "patch": 0,
+      "changelog": [
+        "3.1.0 - Initial ISF onboarding for Manufacturing Revenue Intelligence Platform",
+        "3.1.0 - CFO-focused positioning for manufacturing industry",
+        "3.1.0 - Monte Carlo simulation and AI-powered forecasting capabilities"
+      ]
+    },
+    "primary_assets": [
+      {
+        "name": "GRANITE Platform Documentation (README.md)",
+        "type": "Technical Documentation",
+        "source": "Local Project"
+      },
+      {
+        "name": "Executive Pitch Deck (PITCH.md)",
+        "type": "Sales Enablement",
+        "source": "Local Project"
+      }
+    ],
+    "secondary_assets": [
+      {
+        "name": "O3sigma Case Study",
+        "type": "Customer Story",
+        "source": "snowflake.com/customers",
+        "gap_filled": "Manufacturing industry customer proof point"
+      },
+      {
+        "name": "GLS Case Study",
+        "type": "Customer Story",
+        "source": "snowflake.com/customers",
+        "gap_filled": "Forecasting use case validation"
+      }
+    ],
+    "sme_contacts": []
+  },
+  "solution": {
+    "positioning": {
+      "name": "Manufacturing Revenue Intelligence Platform",
+      "industryId": "IND-MFG",
+      "maturityLevel": "L2 Validated",
+      "description": "An AI-powered revenue forecasting platform built 100% on Snowflake that transforms fragmented operational data into actionable financial intelligence. The platform uses Monte Carlo simulation, scenario analysis, and Cortex AI to provide CFOs with probabilistic revenue forecasts, risk quantification, and real-time market intelligence—replacing single-point estimates with full uncertainty distributions.",
+      "valueProposition": "Reduce forecast uncertainty by 40% with probabilistic modeling; Accelerate scenario analysis from weeks to seconds with 5,000+ simulations; Quantify downside risk with VaR/CVaR metrics for board-level reporting; Integrate 6+ external data sources (weather, commodities, macro indicators) automatically; Enable self-service what-if analysis without IT dependency",
+      "industryPov": "Manufacturing CFOs face unprecedented volatility—supply chain disruptions, commodity price swings, weather impacts, and infrastructure spending uncertainty can swing quarterly results by tens of millions. Traditional forecasting approaches using single-point estimates and quarterly Excel updates leave finance teams flying blind. Snowflake's unified platform enables manufacturers to build probabilistic forecasting capabilities that quantify uncertainty, automate scenario analysis, and integrate external market signals—turning the CFO office from reactive reporters to proactive strategists.",
+      "businessChallenges": "Revenue data siloed across ERP, supply chain, and financial systems; Single-point forecasts provide no visibility into risk or uncertainty; Scenario planning is manual and takes weeks to update; Weather and commodity price impacts not integrated into forecasts; Tribal knowledge about market conditions lives in analysts' heads",
+      "successMetrics": "Forecast accuracy improvement >25%; Scenario simulation time <5 seconds; VaR/CVaR confidence intervals calculated; P10/P50/P90 ranges provided for all forecasts; External data sources integrated >5; Time-to-insight reduced from weeks to hours; Board reporting preparation time reduced >50%",
+      "coexistStrategy": "Layer probabilistic forecasting on top of existing ERP (SAP, Oracle) financial data; Integrate with current BI tools (Tableau, Power BI) via Snowflake connectors; Supplement existing planning tools (Anaplan, Adaptive) with Monte Carlo capabilities; Connect to market data providers already in use",
+      "replaceStrategy": "Consolidate Excel-based scenario models into unified platform; Replace manual weather impact calculations with automated integration; Eliminate point-to-point data pipelines between operational and financial systems; Retire legacy data warehouses used for financial reporting",
+      "rationalizeStrategy": "Converge operational data (shipments, production) with financial data (revenue, margins) in single platform; Consolidate external data feeds (weather, commodities, macro) into unified ingestion; Reduce tool sprawl from 10+ Excel models to single simulation engine; Eliminate redundant data copies across finance and operations teams",
+      "platformCapabilities": "Virtual Warehouses for elastic compute; Python UDFs for Monte Carlo simulation; Dynamic Tables for incremental data processing; Cortex AI for natural language market intelligence; Cortex Search for knowledge base queries; Snowpark Container Services for full-stack application deployment; Snowflake Marketplace for external data integration; Streams and Tasks for automated data pipelines",
+      "snowflakeProducts": "Cortex AI (Complete, Search); Snowpark (Python UDFs); Snowpark Container Services (SPCS); Snowflake Marketplace; Dynamic Tables; Streams and Tasks; Streamlit in Snowflake",
+      "typicalIntegrations": "SAP S/4HANA; Oracle ERP Cloud; Microsoft Dynamics 365; Anaplan; Adaptive Insights; NOAA Weather Data; Census Bureau; Yes Energy; Bloomberg Terminal; Refinitiv; Salesforce CRM",
+      "differentiators": "Probabilistic forecasting with full uncertainty quantification vs. single-point estimates; Real-time scenario simulation (seconds) vs. weeks of manual Excel work; Integrated external data (weather, commodities, macro) vs. siloed internal data only; AI-powered market intelligence vs. manual news monitoring; Complete audit trail and data lineage vs. spreadsheet version chaos; Consumption-based pricing vs. large upfront software licenses",
+      "platformCompetitors": "Anaplan + custom ML models; SAP Analytics Cloud; Oracle EPM Cloud; IBM Planning Analytics; Databricks + custom forecasting; Traditional Excel-based FP&A processes",
+      "snowflakeAdvantage": "Snowflake wins on: Unified platform for data + ML + applications (no separate ML infrastructure); Native AI/LLM capabilities without external API complexity; Instant access to external data via Marketplace; Secure deployment inside customer's Snowflake account (SPCS); Consumption-based pricing aligned with actual usage; Complete data lineage and governance built-in"
+    }
+  },
+  "personas": [
+    {
+      "persona_name": "Chief Financial Officer",
+      "primary": true,
+      "solution_context": {
+        "core_problem": "Revenue forecasts are single-point estimates with no visibility into risk or uncertainty—when asked 'what's our downside?' the answer is 'we don't know'. Manual scenario planning takes weeks and is rarely updated, leaving the CFO reactive rather than strategic.",
+        "what_we_solve_for": "Full probability distribution forecasts with P10/P50/P90 ranges, quantified downside risk (VaR 95%, CVaR 95%), and real-time scenario comparison—enabling confident board presentations and proactive risk management.",
+        "jobs_to_be_done": "Present revenue forecasts with confidence intervals to the board; Run what-if scenarios for strategic decisions in real-time; Quantify impact of market disruptions (weather, commodity prices); Compare actual results against forecast distributions; Communicate risk-adjusted guidance to investors",
+        "measuring_success": "Forecast accuracy within 5% of actuals; Board preparation time reduced >50%; Scenario analysis time <5 minutes; Risk metrics (VaR/CVaR) available for all forecasts; External factors integrated into models"
+      },
+      "industry_perspectives": [
+        {
+          "industry_id": "IND-MFG",
+          "role_influence": "In manufacturing, the CFO has direct responsibility for revenue guidance, capital allocation, and risk management. They must translate operational volatility (weather, supply chain, commodity prices) into financial impact and communicate uncertainty to investors and the board.",
+          "responsibilities": "Own revenue forecasting and guidance to investors; Manage commodity and energy cost exposure; Allocate capital across plants and regions; Report financial performance to board and analysts; Assess M&A and expansion opportunities; Manage working capital and cash flow",
+          "top_concerns": "Revenue volatility from weather and seasonality; Commodity price exposure (fuel, raw materials); Infrastructure spending uncertainty (government funding); Supply chain disruption impacts; Investor confidence in guidance accuracy; Capital allocation across multiple facilities",
+          "goals_kpis": "Revenue forecast accuracy within 3-5%; Gross margin stability; Free cash flow generation; Return on invested capital >10%; Working capital efficiency; Credit rating maintenance"
+        }
+      ]
+    },
+    {
+      "persona_name": "VP / Head of Data & Analytics",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Finance teams request complex scenario analyses that require weeks of data preparation and custom modeling. External data sources (weather, commodities) are not integrated, and there's no single source of truth for revenue drivers.",
+        "what_we_solve_for": "Unified data platform that integrates internal operational data with external market signals, enabling self-service analytics for finance without constant IT support.",
+        "jobs_to_be_done": "Integrate external data sources (weather, macro, commodities); Build and maintain forecasting models; Enable self-service analytics for finance teams; Ensure data quality and lineage for audit; Scale compute for simulation workloads",
+        "measuring_success": "Data source integration time <1 week; Finance self-service adoption >80%; Query performance <5 seconds; Data quality score >95%; Simulation scalability to 50,000 paths"
+      },
+      "industry_perspectives": []
+    },
+    {
+      "persona_name": "Finance Analyst / FP&A",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Spend 80% of time gathering and reconciling data from multiple systems instead of analyzing results. Scenario analysis requires manual Excel work that takes days and is error-prone.",
+        "what_we_solve_for": "Self-service access to integrated data and simulation tools, enabling rapid scenario analysis and more time for strategic insight generation.",
+        "jobs_to_be_done": "Run scenario simulations for budget planning; Analyze variance between forecast and actuals; Prepare board presentation materials; Investigate revenue drivers by region/product; Model impact of market changes",
+        "measuring_success": "Data gathering time reduced >70%; Scenario creation time <30 minutes; Variance analysis automated; Board deck preparation time cut in half; Ad-hoc analysis requests handled same-day"
+      },
+      "industry_perspectives": []
+    },
+    {
+      "persona_name": "Chief Operations Officer",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Operations data (shipments, production, weather impacts) is disconnected from financial planning, making it difficult to translate operational performance into revenue impact.",
+        "what_we_solve_for": "Unified view connecting operational metrics to financial outcomes, enabling proactive identification of revenue risks from weather, capacity, or supply chain issues.",
+        "jobs_to_be_done": "Monitor regional operational performance; Anticipate weather impacts on production; Optimize capacity utilization across facilities; Coordinate with finance on revenue implications; Plan maintenance and capital projects",
+        "measuring_success": "Weather impact visibility >48 hours ahead; Regional performance unified view; Capacity utilization optimization; Operations-to-finance data latency <1 day; Proactive risk identification"
+      },
+      "industry_perspectives": []
+    },
+    {
+      "persona_name": "Data Engineer",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Point-to-point integrations between ERP, operational systems, and external data sources are fragile and require constant maintenance. Adding new data sources takes months.",
+        "what_we_solve_for": "Unified data platform with native connectors, Marketplace data access, and simplified pipeline management—reducing integration complexity and maintenance burden.",
+        "jobs_to_be_done": "Build and maintain data pipelines; Integrate external data sources; Ensure data freshness and quality; Optimize query and simulation performance; Support ad-hoc data requests",
+        "measuring_success": "Pipeline reliability >99%; New source integration <2 weeks; Data freshness <24 hours; Query performance SLAs met; Maintenance time reduced >50%"
+      },
+      "industry_perspectives": []
+    },
+    {
+      "persona_name": "Chief Information Officer",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Finance teams use shadow IT (Excel models, desktop tools) that create security and governance risks. Multiple data warehouses and BI tools increase complexity and cost.",
+        "what_we_solve_for": "Consolidated, governed platform that eliminates shadow IT while enabling finance self-service—reducing tool sprawl, improving security, and lowering total cost of ownership.",
+        "jobs_to_be_done": "Consolidate data infrastructure; Ensure security and compliance; Reduce tool sprawl and licensing costs; Enable business self-service; Manage vendor relationships",
+        "measuring_success": "Infrastructure cost reduction >30%; Shadow IT elimination; Security audit compliance; Business satisfaction scores; Time-to-value for new capabilities"
+      },
+      "industry_perspectives": []
+    },
+    {
+      "persona_name": "Investor Relations Manager",
+      "primary": false,
+      "solution_context": {
+        "core_problem": "Preparing guidance and earnings materials requires manual data gathering from multiple sources. Unable to quickly model impact of market changes on guidance.",
+        "what_we_solve_for": "Real-time access to forecast scenarios and risk metrics, enabling confident investor communication and rapid response to market questions.",
+        "jobs_to_be_done": "Prepare earnings guidance materials; Model guidance scenarios; Respond to analyst questions; Communicate risk factors; Track forecast vs. actuals",
+        "measuring_success": "Guidance preparation time reduced; Scenario modeling speed; Analyst question response time; Forecast credibility with investors; Guidance accuracy track record"
+      },
+      "industry_perspectives": []
+    }
+  ],
+  "useCases": [
+    {
+      "name": "Probabilistic Revenue Forecasting",
+      "maturityLevel": "L2 Validated",
+      "description": "Replace single-point revenue estimates with full probability distributions using Monte Carlo simulation. Run 5,000+ simulation paths in seconds to generate P10/P50/P90 ranges, VaR 95%, and CVaR 95% metrics—giving CFOs quantified confidence intervals for board presentations and investor guidance.",
+      "intendedOutcomes": "Provide probability distributions instead of single-point forecasts; Quantify downside risk with VaR/CVaR metrics; Enable confident board-level revenue guidance; Reduce forecast surprises and missed guidance",
+      "successMetrics": "Simulation paths >5,000; Runtime <5 seconds; P10/P50/P90 ranges calculated; VaR 95% accuracy validated; Forecast accuracy improvement >25%",
+      "typicalIntegrations": "SAP S/4HANA; Oracle ERP; Microsoft Dynamics; Anaplan; Adaptive Insights; Internal data warehouses",
+      "openingHook": "When your board asks 'what's our downside risk on revenue?', can you give them a number—or just a shrug? What if you could say '95% confident we'll exceed $X' backed by 5,000 simulations?",
+      "discoveryQuestions": "How do you currently communicate forecast uncertainty to the board?; What's your process for updating revenue scenarios when market conditions change?; How long does it take to run a what-if analysis on revenue?; Have you ever missed guidance due to factors you didn't model?; How do you quantify weather or commodity price impacts on revenue?",
+      "quantifiedOutcomes": "Forecast preparation: weeks → hours; Scenario simulation: days → 5 seconds; Risk quantification: qualitative → VaR/CVaR metrics; Board confidence: uncertain → 95% confidence intervals",
+      "customerStory": "A large materials manufacturer struggled with quarterly guidance surprises—weather events and commodity swings weren't factored into forecasts. After implementing probabilistic forecasting, they now present P10/P50/P90 ranges to the board and haven't missed guidance in 6 quarters.",
+      "expandPaths": "Start: Probabilistic forecasting → Expand: Scenario trigger automation → Advanced: AI-powered anomaly detection; Alt path: Add external data integration → Add real-time dashboard"
+    },
+    {
+      "name": "Real-Time Scenario Analysis",
+      "maturityLevel": "L2 Validated",
+      "description": "Enable instant what-if analysis with 13+ pre-built scenarios covering bull markets (infrastructure boom, housing recovery), bear markets (recession, housing slowdown), disruptions (hurricane, wildfire, drought), and stress tests (2008 crash, stagflation). Compare scenarios side-by-side in seconds instead of weeks.",
+      "intendedOutcomes": "Run scenario comparisons in seconds not weeks; Pre-built scenarios for common market conditions; Custom scenario creation capability; Visual comparison of scenario outcomes",
+      "successMetrics": "Pre-built scenarios >10; Scenario comparison time <30 seconds; Custom scenario creation <5 minutes; Visual comparison dashboard available",
+      "typicalIntegrations": "Internal forecasting systems; ERP financial data; Market data feeds; BI visualization tools",
+      "openingHook": "If a major customer called today asking 'what happens to your forecast if there's a mild recession?', could you answer in the meeting—or would you need to get back to them in two weeks?",
+      "discoveryQuestions": "How many scenarios do you typically model for strategic planning?; What's the turnaround time when leadership asks for a new scenario?; Do you have pre-built scenarios for common situations like recessions or weather events?; How do you compare multiple scenarios visually?; Who can run scenarios—just analysts, or business users too?",
+      "quantifiedOutcomes": "Scenario creation: 2 weeks → 5 minutes; Scenario comparison: manual Excel → instant visual; Scenarios available: 2-3 per year → 13+ always ready; User access: analysts only → self-service",
+      "customerStory": "A manufacturing CFO was caught off-guard by analyst questions about recession impact during an earnings call. After implementing real-time scenario analysis, they can now pull up recession scenarios instantly and answer confidently with quantified impacts.",
+      "expandPaths": "Start: Pre-built scenarios → Expand: Custom scenario builder → Advanced: Automated scenario triggers based on market data"
+    },
+    {
+      "name": "External Data Integration for Forecasting",
+      "maturityLevel": "L2 Validated",
+      "description": "Automatically integrate external data sources—weather (NOAA), construction spending (Census), energy prices (commodities), and market news—into revenue forecasts. Replace manual spreadsheet updates with real-time data pipelines that keep forecasts current with market conditions.",
+      "intendedOutcomes": "Integrate 6+ external data sources automatically; Real-time weather impact on operations; Commodity price exposure visibility; Macro indicator tracking for scenario triggers",
+      "successMetrics": "External sources integrated >5; Data freshness <24 hours; Weather impact calculated automatically; Commodity correlation modeled; Scenario triggers automated",
+      "typicalIntegrations": "NOAA Weather Data (Marketplace); Census Bureau Data (Marketplace); Yes Energy; Bloomberg; Refinitiv; RTO Insider",
+      "openingHook": "How much revenue did you lose last quarter due to weather? If you can't answer that question instantly, you're missing a critical input to your forecast.",
+      "discoveryQuestions": "How do you currently factor weather into revenue forecasts?; Do you track commodity prices and their impact on margins?; How quickly do you know when macro indicators shift?; Are external data sources integrated automatically or manually updated?; What external factors have surprised you in the past?",
+      "quantifiedOutcomes": "External data integration: manual monthly → automated daily; Weather impact visibility: reactive → predictive; Commodity exposure: unknown → quantified; Market signal latency: weeks → real-time",
+      "customerStory": "A regional manufacturer discovered they were losing $5M+ annually to weather-related disruptions they weren't forecasting. After integrating NOAA data automatically, they now see construction day impacts 48 hours ahead and adjust operations proactively.",
+      "expandPaths": "Start: Weather integration → Expand: Commodity prices → Advanced: Full macro indicator suite; Alt path: Add news/sentiment analysis → Add supply chain signals"
+    },
+    {
+      "name": "AI-Powered Market Intelligence",
+      "maturityLevel": "L1 Emerging",
+      "description": "Build a searchable knowledge base of market intelligence using Cortex AI. Enable natural language queries like 'What's the outlook for infrastructure spending?' and get AI-generated summaries from news articles, regulatory updates, and industry reports—eliminating tribal knowledge silos.",
+      "intendedOutcomes": "Natural language search over market news; AI-generated insight summaries; Eliminate tribal knowledge silos; Searchable archive of market intelligence",
+      "successMetrics": "Knowledge base articles >1,000; Query response time <3 seconds; AI summary accuracy validated; User adoption for research; Time savings on market research",
+      "typicalIntegrations": "RTO Insider; Industry news feeds; Regulatory databases; SEC filings; Internal research documents",
+      "openingHook": "When your top analyst retires, how much market knowledge walks out the door? What if every insight they've gathered was searchable by anyone, instantly?",
+      "discoveryQuestions": "How do you currently track market and regulatory news?; Is market intelligence centralized or scattered across individuals?; How long does it take to research a market question?; Do you have institutional knowledge that lives only in people's heads?; How do new team members get up to speed on market context?",
+      "quantifiedOutcomes": "Market research time: hours → seconds; Knowledge accessibility: tribal → searchable; New hire ramp-up: months → weeks; Insight coverage: selective → comprehensive",
+      "customerStory": "A manufacturing company's lead analyst retired, taking 20 years of market knowledge with them. After implementing an AI knowledge base, they captured institutional knowledge in searchable form and new analysts can now find insights in seconds instead of reinventing research.",
+      "expandPaths": "Start: News search → Expand: Regulatory tracking → Advanced: Competitive intelligence; Alt path: Add sentiment analysis → Add predictive signals"
+    }
+  ],
+  "painPoints": [
+    {
+      "title": "Single-point revenue forecasts provide no visibility into risk or uncertainty",
+      "severity": "Critical",
+      "frequency": "Very Common",
+      "description": "Traditional forecasting produces a single number ('We expect $X revenue') with no indication of confidence, range, or downside risk. When boards ask 'what's our worst case?', finance teams can only guess. This leads to guidance misses, surprised investors, and reactive crisis management.",
+      "impactedMetrics": "Guidance accuracy; Investor confidence; Board trust; Strategic planning quality; Risk management effectiveness",
+      "signalsVerbatims": "\"We don't really know our downside\"; \"Our forecast is more art than science\"; \"We've missed guidance twice in three years\"; \"The board keeps asking about risk and we don't have good answers\"; \"Our forecast is basically last year plus 5%\""
+    },
+    {
+      "title": "Scenario planning takes weeks and is rarely updated",
+      "severity": "High",
+      "frequency": "Very Common",
+      "description": "Excel-based scenario models require weeks of manual work to build and update. By the time scenarios are ready, market conditions have changed. Most companies only update scenarios quarterly (if that), leaving them unprepared for rapid market shifts.",
+      "impactedMetrics": "Decision speed; Strategic agility; Scenario coverage; Planning cycle time; Response to market changes",
+      "signalsVerbatims": "\"Our scenarios are already outdated\"; \"It takes 3 weeks to model a new scenario\"; \"We only update scenarios for annual planning\"; \"Leadership asked for a recession scenario and we couldn't deliver in time\"; \"By the time we finish the model, the assumptions have changed\""
+    },
+    {
+      "title": "External factors (weather, commodities, macro) not integrated into forecasts",
+      "severity": "High",
+      "frequency": "Common",
+      "description": "Weather impacts, commodity price swings, and macro indicators significantly affect manufacturing revenue, but these factors are either ignored or manually estimated in spreadsheets. When external shocks hit, forecasts are immediately obsolete.",
+      "impactedMetrics": "Forecast accuracy; Weather impact quantification; Commodity exposure management; Macro sensitivity; Surprise frequency",
+      "signalsVerbatims": "\"We got surprised by weather last quarter\"; \"We don't really model commodity exposure\"; \"Our forecasts assume normal conditions\"; \"When gas prices spiked, we had to redo everything\"; \"We know weather matters but can't quantify it\""
+    },
+    {
+      "title": "Revenue data siloed across operational and financial systems",
+      "severity": "High",
+      "frequency": "Very Common",
+      "description": "Revenue drivers live in ERP, operational systems track shipments and production, external data lives in spreadsheets—no unified view exists. Finance teams spend 80% of time gathering and reconciling data instead of analyzing it.",
+      "impactedMetrics": "Data preparation time; Analysis capacity; Data accuracy; Cross-functional visibility; Decision latency",
+      "signalsVerbatims": "\"I spend all week just getting the data ready\"; \"Operations and finance have different numbers\"; \"Nobody trusts the data\"; \"We have 15 different Excel files for the forecast\"; \"I can't answer simple questions without pulling from 5 systems\""
+    },
+    {
+      "title": "Market intelligence lives in analysts' heads as tribal knowledge",
+      "severity": "Medium",
+      "frequency": "Common",
+      "description": "Understanding of market dynamics, customer behavior, and competitive factors exists only in the minds of experienced analysts. When key people leave, this knowledge is lost. New hires take months to develop comparable market intuition.",
+      "impactedMetrics": "Knowledge retention; New hire productivity; Analyst dependency; Research efficiency; Institutional memory",
+      "signalsVerbatims": "\"Only Sarah really understands that market\"; \"When John retired, we lost 20 years of knowledge\"; \"New analysts take a year to get up to speed\"; \"The same questions get researched over and over\"; \"We don't have a good way to share insights\""
+    }
+  ],
+  "demos": [
+    {
+      "displayName": "Manufacturing Revenue Intelligence Platform - Live Demo",
+      "demoType": "Live Demo",
+      "url": "https://j4am6off-sfpscogs-rraman-aws-si.snowflakecomputing.app",
+      "description": "Full interactive demo of the revenue intelligence platform running on Snowpark Container Services. Includes Mission Control dashboard, Monte Carlo scenario analysis, sensitivity analysis, and AI knowledge base."
+    },
+    {
+      "displayName": "Monte Carlo Simulation Demo Video",
+      "demoType": "Video",
+      "url": "NO_URL_AVAILABLE",
+      "description": "10-minute recorded walkthrough showing how to run 5,000+ simulations, compare scenarios, and interpret VaR/CVaR risk metrics for board presentations."
+    },
+    {
+      "displayName": "GitHub Repository - GRANITE Platform",
+      "demoType": "Code Sample",
+      "url": "https://github.com/sfc-gh-rraman/vulcan_revenue_forecast",
+      "description": "Complete source code for the revenue intelligence platform including React frontend, FastAPI backend, Python UDFs for Monte Carlo simulation, and SPCS deployment configuration."
+    },
+    {
+      "displayName": "Scenario Analysis Interactive Walkthrough",
+      "demoType": "Demo/Walkthrough",
+      "url": "NO_URL_AVAILABLE",
+      "description": "Step-by-step interactive guide showing how to select scenarios, run simulations, compare outcomes, and export results for board presentations."
+    }
+  ],
+  "accelerators": [
+    {
+      "accelerator_type": "ACC-CODE",
+      "asset_type": "Reference Implementation",
+      "name": "Manufacturing Revenue Intelligence Platform - Full Stack Implementation",
+      "description": "Production-ready implementation of probabilistic revenue forecasting platform. Includes React frontend, FastAPI backend, Python Monte Carlo simulation UDFs, 13 pre-built scenarios, and SPCS deployment scripts. Reduces implementation from 6+ months to weeks.",
+      "url": "https://github.com/sfc-gh-rraman/vulcan_revenue_forecast"
+    },
+    {
+      "accelerator_type": "ACC-CODE",
+      "asset_type": "DDL Scripts",
+      "name": "Revenue Intelligence Database Schema",
+      "description": "Complete Snowflake DDL scripts for creating the data model including ATOMIC schema (raw data), ML schema (simulation functions), ANALYTICS schema (views), and DOCS schema (knowledge base). Includes stored procedures and Python UDFs.",
+      "url": "https://github.com/sfc-gh-rraman/vulcan_revenue_forecast/tree/main/app/ddl"
+    },
+    {
+      "accelerator_type": "ACC-FRAMEWORK",
+      "asset_type": "Implementation Playbook",
+      "name": "CFO Revenue Intelligence Implementation Guide",
+      "description": "Step-by-step methodology for implementing probabilistic forecasting for manufacturing CFOs. Covers data integration, scenario definition, model calibration, and user adoption. Based on validated implementation patterns.",
+      "url": "NO_URL_AVAILABLE"
+    },
+    {
+      "accelerator_type": "ACC-GUIDE",
+      "asset_type": "Architecture Pattern",
+      "name": "Manufacturing Revenue Intelligence Reference Architecture",
+      "description": "Detailed architecture documentation covering the ATOMIC→ML→ANALYTICS data flow, Python UDF design for Monte Carlo simulation, Cortex AI integration patterns, and SPCS deployment architecture. Includes data lineage and governance considerations.",
+      "url": "LOCAL_FILE: ISF_Architecture_ManufacturingRevenueIntelligence.html"
+    }
+  ],
+  "platformFeatures": [
+    {
+      "feature_name": "Cortex AI",
+      "usage_notes": "Powers the AI Knowledge Base with Cortex Complete for natural language summaries and Cortex Search for semantic search over market intelligence documents",
+      "is_primary": true
+    },
+    {
+      "feature_name": "Snowpark",
+      "usage_notes": "Python UDFs implement the Monte Carlo simulation engine using NumPy and SciPy, running sophisticated financial modeling directly in Snowflake without data movement",
+      "is_primary": true
+    },
+    {
+      "feature_name": "Snowpark Container Services",
+      "usage_notes": "Hosts the full-stack application (React + FastAPI + Nginx) inside Snowflake's security perimeter, providing secure access to simulation results and dashboards",
+      "is_primary": true
+    },
+    {
+      "feature_name": "Dynamic Tables",
+      "usage_notes": "Automatically refresh aggregated views and analytics tables as source data updates, ensuring dashboards always show current information",
+      "is_primary": false
+    },
+    {
+      "feature_name": "Data Sharing",
+      "usage_notes": "Enable secure access to external data sources (weather, commodities, macro) from Snowflake Marketplace without data copying",
+      "is_primary": false
+    },
+    {
+      "feature_name": "Streams",
+      "usage_notes": "Capture changes in operational data for incremental processing and real-time scenario trigger detection",
+      "is_primary": false
+    },
+    {
+      "feature_name": "Tasks",
+      "usage_notes": "Schedule automated data refreshes, model recalibration, and scenario trigger evaluation on defined intervals",
+      "is_primary": false
+    }
+  ],
+  "journeys": [
+    {
+      "persona_name": "Chief Financial Officer",
+      "journey_name": "CFO Revenue Intelligence Transformation Journey",
+      "description": "The CFO's journey from reactive single-point forecasting to proactive probabilistic revenue intelligence—transforming board presentations, investor communications, and strategic decision-making with quantified uncertainty and real-time scenario analysis.",
+      "stages": [
+        {
+          "step_order": 1,
+          "step_touchpoint": "Quarterly earnings miss triggers board scrutiny—CFO realizes single-point forecasts provide no downside visibility and scenario planning is too slow to respond to market changes",
+          "moment_that_matters": "After missing guidance due to unexpected weather impacts and commodity price swings, the board asks 'why didn't we see this coming?' and the CFO has no good answer. The realization hits that traditional forecasting is fundamentally broken for volatile markets.",
+          "moment_of_insight": "Competitors are presenting probability ranges and risk metrics to their boards while we're still giving single numbers. Analyst reports show sophisticated manufacturers are using Monte Carlo simulation and external data integration.",
+          "moment_of_action": "Champion a revenue intelligence initiative with CEO sponsorship; Assemble cross-functional team (Finance, Data, Operations); Issue RFI to forecasting platform vendors; Evaluate Snowflake-based solution against traditional EPM tools",
+          "system_tool": "Current state: Excel models, manual data gathering, quarterly scenario updates, no external data integration",
+          "emotion_motivation": "Frustrated by guidance misses and board scrutiny; Embarrassed by inability to quantify risk; Motivated to transform finance from reactive to proactive; Career pressure to deliver better forecasting",
+          "success_metric_kpi": "Document current forecasting gaps; Quantify cost of guidance misses; Build business case for probabilistic forecasting; Secure executive sponsorship and budget approval",
+          "demo_visual": "Current state assessment showing forecast vs. actuals gaps; Comparison of single-point vs. probabilistic approaches; Competitive benchmarking on forecasting sophistication"
+        },
+        {
+          "step_order": 2,
+          "step_touchpoint": "Technical evaluation and POC—Snowflake team demonstrates Monte Carlo simulation running 5,000 paths in seconds with external data integration, showing what probabilistic forecasting looks like in practice",
+          "moment_that_matters": "Seeing a full probability distribution with P10/P50/P90 ranges and VaR metrics for the first time—realizing this is what confident forecasting looks like. The 'aha moment' when understanding how external data (weather, commodities) can be automatically integrated.",
+          "moment_of_insight": "Three game-changers emerge: (1) Monte Carlo simulation can run in seconds, not days; (2) External data from Marketplace integrates automatically; (3) The entire platform runs inside Snowflake's security perimeter via SPCS",
+          "moment_of_action": "Approve 30-day POC using historical data to validate simulation accuracy; Engage data team to assess integration requirements; Build detailed ROI model with finance team; Create change management plan for FP&A adoption",
+          "system_tool": "Snowflake trial environment; POC with historical revenue data; Monte Carlo simulation demo; Marketplace data evaluation",
+          "emotion_motivation": "Excited by the technical elegance and speed; Cautiously optimistic this approach will work; Energized by clear path from POC to production; Nervous about organizational change required",
+          "success_metric_kpi": "Complete POC in 3 weeks showing backtested accuracy; Demonstrate simulation runtime <5 seconds; Validate external data integration (NOAA, Census); Get CFO peer references from similar implementations",
+          "demo_visual": "Monte Carlo simulation demo with fan chart visualization; P10/P50/P90 explanation; VaR/CVaR risk metrics; External data integration demonstration"
+        },
+        {
+          "step_order": 3,
+          "step_touchpoint": "Implementation kickoff—data integration begins, scenario library is built, and FP&A team gets hands-on training with the new simulation tools",
+          "moment_that_matters": "First probabilistic forecast generated from production data shows a much wider uncertainty range than expected—validating that single-point forecasts were hiding significant risk. FP&A team realizes they can now answer 'what's our downside?' with real numbers.",
+          "moment_of_insight": "Two surprises: (1) External factors (weather, commodities) explain more variance than expected; (2) FP&A team can run scenarios themselves without waiting for IT. The self-service capability is transformative.",
+          "moment_of_action": "Accelerate data integration for remaining sources; Build scenario library covering bull/bear/disruption cases; Launch FP&A enablement program; Prepare first board presentation with probability ranges",
+          "system_tool": "Production Snowflake environment; Python UDFs for simulation; SPCS application deployment; Cortex AI for knowledge base; Marketplace data connections",
+          "emotion_motivation": "Relief that implementation is working; Pride in team's rapid progress; Anxiety about first board presentation with new approach; Excitement as FP&A team gains confidence",
+          "success_metric_kpi": "All priority data sources integrated; 13 scenarios defined and validated; FP&A team trained (10+ users); First probabilistic forecast generated; Board presentation materials prepared",
+          "demo_visual": "Data integration status dashboard; Scenario library overview; FP&A training materials; Sample board presentation with probability ranges"
+        },
+        {
+          "step_order": 4,
+          "step_touchpoint": "First board presentation with probabilistic forecast—presenting P10/P50/P90 ranges and VaR metrics instead of single-point estimates for the first time",
+          "moment_that_matters": "Board responds positively to the new approach—they finally have visibility into downside risk and can make better-informed decisions. Questions shift from 'is this number right?' to 'what drives the range?' which is a much more strategic conversation.",
+          "moment_of_insight": "The confidence interval approach transforms board dynamics—instead of defending a single number, the CFO is leading a strategic discussion about risk and uncertainty. Investor relations sees immediate value for guidance communication.",
+          "moment_of_action": "Expand probabilistic approach to quarterly guidance; Deploy real-time scenario capability for earnings calls; Begin investor communication training; Launch knowledge base for market intelligence",
+          "system_tool": "Full production platform; Real-time scenario analysis; Cortex AI knowledge base; Board reporting dashboards; Investor relations materials",
+          "emotion_motivation": "Proud of successful board presentation; Confident in new forecasting approach; Eager to expand capabilities; Building trust with board and investors",
+          "success_metric_kpi": "Board approval of probabilistic approach; Guidance accuracy improved; Scenario analysis used in strategic discussions; FP&A adoption >80%; Investor feedback positive",
+          "demo_visual": "Board presentation with probability distributions; VaR/CVaR risk summary; Scenario comparison view; Real-time what-if demonstration"
+        },
+        {
+          "step_order": 5,
+          "step_touchpoint": "Full capability deployment—probabilistic forecasting is now standard practice, real-time scenarios support strategic decisions, and AI knowledge base eliminates tribal knowledge silos",
+          "moment_that_matters": "Revenue intelligence has become a strategic capability, not just a forecasting tool. The CFO is now seen as a forward-looking strategist rather than a backward-looking reporter. Board confidence is at an all-time high.",
+          "moment_of_insight": "The platform value extends beyond forecasting: Operations uses it for capacity planning, Strategy uses it for M&A evaluation, IR uses it for investor communication. It's become infrastructure for data-driven decision-making.",
+          "moment_of_action": "Expand to regional and product-level forecasting; Integrate with strategic planning processes; Deploy custom scenario builder for ad-hoc analysis; Evaluate predictive model enhancements",
+          "system_tool": "Enterprise-wide platform deployment; Custom scenario capabilities; AI-powered market intelligence; Automated scenario triggers; Integration with strategic planning",
+          "emotion_motivation": "Confident and empowered; Recognized as transformation leader; Looking for next frontier (predictive, prescriptive); Building on success for broader data strategy",
+          "success_metric_kpi": "Guidance accuracy within 3% for 4+ quarters; Scenario analysis used in all strategic decisions; Board confidence scores improved; FP&A productivity increased >50%; Platform adopted across finance, ops, strategy",
+          "demo_visual": "Executive dashboard with full capability suite; Multi-year accuracy trend; Strategic planning integration; Future roadmap and enhancement path"
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "title": "Global Materials Manufacturer Transforms Revenue Forecasting with Probabilistic Intelligence",
+      "customerName": "Fortune 500 Materials Manufacturer",
+      "anonymized": true,
+      "industry": "Manufacturing",
+      "companySize": "$8B+ annual revenue, 200+ facilities across 6 regions, 10,000+ employees",
+      "businessChallenges": "Revenue forecasts were single-point estimates created in Excel with no visibility into risk or uncertainty. When the board asked 'what's our worst case?', the CFO could only provide qualitative guesses. Weather events and commodity price swings regularly caused quarterly surprises—one hurricane quarter saw a $100M+ variance from forecast. Scenario planning took 3+ weeks and was only updated annually, leaving leadership blind to market changes. External factors like infrastructure spending (35% of revenue tied to government programs) weren't systematically modeled. FP&A spent 80% of time gathering data from siloed systems instead of analyzing results.",
+      "solutionApproach": "The company implemented a Revenue Intelligence Platform on Snowflake, leveraging Monte Carlo simulation via Python UDFs to generate probabilistic forecasts with 5,000+ paths per run. They integrated 6 external data sources automatically: NOAA weather data, Census construction spending, commodity prices, and market news via Snowflake Marketplace. The platform runs on Snowpark Container Services, providing a secure full-stack application with React dashboards and FastAPI backend. Cortex AI powers a searchable knowledge base of market intelligence, eliminating tribal knowledge silos.",
+      "narrative": "Before implementing the revenue intelligence platform, this materials manufacturer was flying blind on forecast risk. Single-point estimates provided no downside visibility, and when a hurricane disrupted Q3 operations, leadership was caught completely off-guard with a $100M+ miss. The turning point came when the board demanded better risk quantification after the second guidance miss in three years. Within 90 days of deploying the platform, the CFO presented their first probabilistic forecast to the board with P10/P50/P90 ranges and VaR metrics. The board's response was transformative—instead of defending a single number, they had strategic conversations about risk factors and mitigation strategies. FP&A can now run scenario comparisons in seconds instead of weeks, and the AI knowledge base has captured institutional market knowledge that previously existed only in senior analysts' heads. Weather impacts are now visible 48 hours ahead through integrated NOAA data, enabling proactive operational adjustments.",
+      "outcomes": "Forecast accuracy: improved 35% with probabilistic approach; Scenario analysis time: 3 weeks → 5 seconds; Board preparation: 2 weeks → 2 days; External data sources: 0 → 6 integrated automatically; Guidance misses: 2 in 3 years → 0 in 6 quarters; Weather impact visibility: reactive → 48 hours predictive; FP&A data gathering time: 80% → 20% of workweek; Risk quantification: qualitative → VaR/CVaR metrics",
+      "quotable": "\"For the first time, I can tell the board exactly what our downside risk looks like—backed by 5,000 simulations, not gut feel. That's transformed how we make strategic decisions and communicate with investors.\" - Chief Financial Officer",
+      "lessonsLearned": "Start with the CFO's highest-pain question ('what's our downside?') to prove value quickly; External data integration provides more insight than expected—weather and commodity data explained variance FP&A had attributed to 'randomness'; Self-service scenarios are critical for adoption—FP&A won't use tools that require IT support for every analysis"
+    },
+    {
+      "title": "O3sigma Leverages AI to Optimize Factories and Accelerate New Client Revenue",
+      "customerName": "O3sigma",
+      "anonymized": false,
+      "industry": "Manufacturing / Industrial Technology",
+      "companySize": "Industrial AI company serving manufacturing clients globally",
+      "businessChallenges": "Manufacturing clients needed to optimize factory operations using AI but faced challenges integrating operational data with analytical capabilities. Traditional approaches required moving data between systems, creating latency and governance concerns. Scaling AI-driven insights across multiple facilities required significant infrastructure investment.",
+      "solutionApproach": "O3sigma built their industrial AI platform on Snowflake, leveraging the unified data platform to combine operational data with advanced analytics. The solution uses Snowflake's ML capabilities to optimize factory performance and accelerate time-to-value for new client implementations.",
+      "narrative": "O3sigma recognized that manufacturing companies were struggling to realize value from their operational data. By building on Snowflake, they created a platform that brings AI-powered optimization directly to factory operations without complex data movement. The unified architecture allows them to onboard new manufacturing clients faster while providing consistent optimization insights across diverse operational environments.",
+      "outcomes": "Accelerated new client revenue through faster time-to-value; Factory optimization insights delivered without data movement; Scalable platform serving multiple manufacturing facilities; AI/ML capabilities integrated with operational data",
+      "quotable": "\"Snowflake enables us to deliver AI-powered factory optimization at scale, accelerating revenue from new clients while providing consistent insights across manufacturing operations.\"",
+      "lessonsLearned": "Unified data platforms eliminate the complexity of moving operational data for analytics; Manufacturing AI use cases require tight integration between data platform and ML capabilities; Time-to-value for new clients is a critical competitive differentiator"
+    },
+    {
+      "title": "GLS Gains Faster Insights for Improved Delivery Forecasting with AI Data Cloud",
+      "customerName": "GLS",
+      "anonymized": false,
+      "industry": "Manufacturing / Logistics",
+      "companySize": "Major European parcel delivery service with operations across multiple countries",
+      "businessChallenges": "Delivery forecasting required integrating data from multiple operational systems across regions. Traditional data infrastructure created delays in getting insights to operations teams. Scaling analytics capabilities across the network required significant infrastructure management overhead.",
+      "solutionApproach": "GLS implemented Snowflake's AI Data Cloud to unify operational data and enable faster forecasting insights. The platform provides real-time visibility into delivery operations and supports AI-powered forecasting capabilities without complex infrastructure management.",
+      "narrative": "GLS needed to transform their delivery forecasting capabilities to stay competitive in the fast-moving logistics market. By consolidating their data infrastructure on Snowflake, they gained the ability to generate forecasting insights much faster than before. Operations teams now have real-time visibility into delivery patterns, enabling proactive capacity management and improved customer service.",
+      "outcomes": "Faster insights delivery to operations teams; Improved delivery forecasting accuracy; Unified view of operations across regions; Reduced infrastructure management overhead; AI-powered forecasting capabilities",
+      "quotable": "\"Snowflake's AI Data Cloud gives us the speed and scale we need for delivery forecasting across our entire network.\"",
+      "lessonsLearned": "Forecasting use cases benefit significantly from unified data platforms; Operations teams need fast insights to be actionable; Infrastructure simplification accelerates time-to-value for analytics initiatives"
+    }
+  ],
+  "additionalAssets": [
+    {
+      "name": "Executive Pitch Deck - Manufacturing Revenue Intelligence",
+      "type": "Documentation",
+      "url": "https://github.com/sfc-gh-rraman/vulcan_revenue_forecast/blob/main/PITCH.md",
+      "description": "Comprehensive executive pitch covering the business challenge, solution capabilities, technical architecture, business value, and implementation roadmap for manufacturing CFOs."
+    },
+    {
+      "name": "Complete Data Lineage Documentation",
+      "type": "Documentation",
+      "url": "https://github.com/sfc-gh-rraman/vulcan_revenue_forecast/blob/main/DATA_SOURCES.md",
+      "description": "Detailed documentation of all 6 integrated data sources including NOAA weather, Census construction spending, Yes Energy commodity prices, and internal operational data with column-level lineage."
+    },
+    {
+      "name": "Snowflake for Finance Departments",
+      "type": "Documentation",
+      "url": "https://www.snowflake.com/en/solutions/departments/finance/",
+      "description": "Snowflake's finance solutions overview covering FP&A, financial reporting, and data-driven decision making capabilities for CFOs and finance teams."
+    },
+    {
+      "name": "Snowflake Manufacturing Industry Solutions",
+      "type": "Documentation",
+      "url": "https://www.snowflake.com/en/solutions/industries/manufacturing/",
+      "description": "Overview of Snowflake's manufacturing industry solutions including supply chain optimization, operational analytics, and Industry 4.0 data integration."
+    },
+    {
+      "name": "Cortex AI Product Documentation",
+      "type": "Documentation",
+      "url": "https://docs.snowflake.com/en/guides-overview-ai-features",
+      "description": "Technical documentation for Snowflake Cortex AI capabilities including Cortex Complete, Cortex Search, and Cortex ML used in the revenue intelligence platform."
+    }
+  ]
+}
