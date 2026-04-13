@@ -61,12 +61,12 @@ const dataSources: DataSource[] = [
     category: 'marketplace',
     icon: CloudLightning,
     color: 'blue',
-    description: 'Daily weather metrics from NOAA stations mapped to Vulcan sales regions. Drives construction day calculations and seasonal adjustments.',
+    description: 'Daily weather metrics from NOAA stations mapped to SnowCore sales regions. Drives construction day calculations and seasonal adjustments.',
     sourceLocation: 'SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE.NOAA_WEATHER_METRICS_TIMESERIES',
     tables: [{
       name: 'DAILY_WEATHER',
       schema: 'ATOMIC',
-      description: 'Aggregated daily weather by Vulcan sales region with construction feasibility flags',
+      description: 'Aggregated daily weather by SnowCore sales region with construction feasibility flags',
       columns: [
         { name: 'TEMP_HIGH_F', source: 'NOAA_WEATHER_METRICS.TMAX', transformation: 'VALUE * 9/50 + 32 (°C→°F)', businessMeaning: 'Daily high temperature - affects concrete curing and asphalt laying' },
         { name: 'TEMP_LOW_F', source: 'NOAA_WEATHER_METRICS.TMIN', transformation: 'VALUE * 9/50 + 32 (°C→°F)', businessMeaning: 'Daily low temperature - freeze risk indicator' },
@@ -167,12 +167,12 @@ const dataSources: DataSource[] = [
   },
   {
     id: 'sec_filings',
-    name: 'Vulcan SEC Filings',
+    name: 'SnowCore SEC Filings',
     provider: 'SEC 10-K/10-Q (Manual)',
     category: 'sec',
     icon: FileText,
     color: 'slate',
-    description: 'Quarterly financial data from Vulcan Materials SEC filings. Ground truth for model calibration and backtesting.',
+    description: 'Quarterly financial data from SnowCore Materials SEC filings. Ground truth for model calibration and backtesting.',
     sourceLocation: 'Manual entry from investor.vulcanmaterials.com',
     tables: [{
       name: 'QUARTERLY_FINANCIALS',
@@ -230,7 +230,7 @@ const dataSources: DataSource[] = [
     icon: ClipboardList,
     color: 'amber',
     description: '13 predefined scenarios with revenue multipliers, triggers, and phase definitions. Drives the Monte Carlo simulation engine.',
-    sourceLocation: 'VULCAN_MATERIALS_DB.ML.SCENARIO_DEFINITIONS',
+    sourceLocation: 'SNOWCORE_MATERIALS_DB.ML.SCENARIO_DEFINITIONS',
     tables: [{
       name: 'SCENARIO_DEFINITIONS',
       schema: 'ML',

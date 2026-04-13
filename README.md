@@ -1,215 +1,153 @@
-# GRANITE: Vulcan Revenue Intelligence Platform
+# SnowCore Revenue Intelligence Platform
 
 [![Snowflake](https://img.shields.io/badge/Snowflake-Native-29B5E8?logo=snowflake&logoColor=white)](https://www.snowflake.com)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://reactjs.org)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![SPCS](https://img.shields.io/badge/SPCS-Deployed-blueviolet)](https://docs.snowflake.com/en/developer-guide/snowpark-container-services/overview)
 
 > **From data to decisions in seconds, not weeks.**
 
-**GRANITE** (**G**rowth **R**evenue **A**nalytics with **N**ative **I**ntelligence & **T**rend **E**xploration) is an AI-powered revenue forecasting platform built 100% on Snowflake. It transforms fragmented data into actionable intelligence using Monte Carlo simulation, scenario analysis, and Cortex AI.
+SnowCore Revenue Intelligence is an AI-powered forecasting platform for the construction materials industry, built entirely on Snowflake. It combines Monte Carlo simulation, Cortex AI agents, and real-time market data to transform revenue planning from static spreadsheets into probabilistic, interactive intelligence.
 
 ---
 
-## Quick Start
+## Live Deployment
 
-### Prerequisites
+| Environment | URL | Database |
+|-------------|-----|----------|
+| **V2 (SnowCore)** | `fcbm6off-sfpscogs-rraman-aws-si.snowflakecomputing.app` | `SNOWCORE_MATERIALS_DB` |
+| **V1 (Legacy)** | `j4am6off-sfpscogs-rraman-aws-si.snowflakecomputing.app` | `VULCAN_MATERIALS_DB` |
 
-- Snowflake account with:
-  - Access to Snowflake Marketplace (NOAA, Census data)
-  - Yes Energy data subscription (optional)
-  - Cortex AI enabled
-  - SPCS compute pool
-- Docker Desktop
-- Node.js 18+ and Python 3.11+
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/sfc-gh-rraman/vulcan_revenue_forecast.git
-cd vulcan_revenue_forecast
-
-# Run DDL scripts to set up database objects
-snowsql -f app/ddl/001_database.sql
-snowsql -f app/ddl/002_atomic_tables.sql
-# ... run all DDL scripts in order
-
-# Build and deploy to SPCS
-docker build --platform linux/amd64 -t granite-vulcan:latest .
-docker tag granite-vulcan:latest <your-registry>/vulcan_materials_db/ml/images/granite-vulcan:latest
-docker push <your-registry>/vulcan_materials_db/ml/images/granite-vulcan:latest
-
-# Create the service
-snowsql -f deploy/deploy.sh
-```
-
-### Local Development
-
-```bash
-# Frontend
-cd frontend
-npm install
-npm run dev
-
-# Backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+Both services run on the `GRANITE_COMPUTE_POOL` (CPU_X64_XS, MAX_NODES=2) via Snowpark Container Services.
 
 ---
 
-## The Challenge
+## Platform Overview
 
-### Construction Materials Revenue Forecasting is Broken
+### 14 Interactive Pages
 
-| Challenge | Impact |
-|-----------|--------|
-| **Siloed Data** | Weather, macro indicators, energy prices, and sales live in separate systems |
-| **Single-Point Forecasts** | "We expect $8B revenue" tells you nothing about risk or uncertainty |
-| **Reactive Decision Making** | By the time trends are visible in financials, it's too late to act |
-| **Scenario Planning is Manual** | Excel-based what-if analysis takes weeks and is rarely updated |
-| **Tribal Knowledge** | Market insights live in analysts' heads, not in searchable systems |
+| Page | Purpose |
+|------|---------|
+| **Mission Control** | Real-time KPIs, regional performance, weather alerts, scenario trigger monitoring |
+| **Revenue Deep Dive** | Monthly trends, segment breakdown, regional analysis, price history |
+| **Scenario Analysis** | Monte Carlo simulation engine with 13 pre-built scenarios and path distribution charts |
+| **Sensitivity Analysis** | Parameter sweeps across drift, volatility, shocks, and growth assumptions |
+| **Demand Sensing** | Price elasticity models, cross-elasticity matrix, macro demand drivers |
+| **Pricing Center** | Optimal pricing recommendations by region and product segment |
+| **Competitive Intel** | MSHA-sourced competitive landscape, quarry mapping, peer revenue trends |
+| **Region Map** | Geographic performance view with plant counts and capacity metrics |
+| **Shipments** | Volume tracking and shipment analysis |
+| **Weather Risk** | Weather impact on operations, regional exposure scoring |
+| **Risk Comparison** | Side-by-side model comparison across scenarios |
+| **Knowledge Base** | Cortex Search over competitor filings and scenario research |
+| **Data Explorer** | Complete data lineage from source to application |
+| **Landing** | Platform overview and navigation |
 
-**The stakes are high:**
-- Vulcan Materials: $8B+ annual revenue, 226M tons shipped annually
-- 35% of revenue tied to infrastructure spending (IIJA volatility)
-- Weather disruptions can swing quarterly results by $100M+
-- Energy costs directly impact margins (diesel, natural gas)
+### AI-Powered Features
 
----
-
-## Platform Capabilities
-
-### 1. Mission Control Dashboard
-*"What's happening right now?"*
-
-- Real-time KPIs: Revenue, shipments, price/ton, margins
-- Regional performance with capacity utilization
-- Weather alerts and construction days lost
-- Scenario trigger monitoring (which scenarios are currently active?)
-
-### 2. Monte Carlo Scenario Analysis
-*"What could happen, and how likely is it?"*
-
-- Run 5,000+ simulations in seconds
-- 13 pre-built scenarios:
-  - **Bull**: Infrastructure Boom (IIJA), Housing Recovery, Energy Tailwind
-  - **Bear**: Mild Recession, Housing Slowdown, Energy Squeeze
-  - **Disruption**: Hurricane, Wildfire, Drought (phased impact + recovery)
-  - **Stress**: 2008 Housing Crash, Stagflation
-- Output: Terminal revenue distribution, VaR 95%, CVaR 95%, P10/P50/P90
-
-### 3. Sensitivity Analysis
-*"Which levers matter most?"*
-
-- Vary drift, volatility, revenue shocks, growth assumptions
-- Visualize impact on terminal revenue and risk metrics
-- Identify which parameters the forecast is most sensitive to
-- Plain-English interpretation of results
-
-### 4. AI Knowledge Base
-*"What's the market saying?"*
-
-- Cortex Search over infrastructure & energy news
-- Natural language queries: "What's the outlook for IIJA funding?"
-- Sources: RTO Insider, construction industry news, regulatory updates
-- AI-generated summaries and insights
-
-### 5. Data Explorer
-*"Where does the data come from?"*
-
-- Complete data lineage from source to application
-- Column-level transformations documented
-- Usage tracking: which views/procedures consume each table
-- Full transparency for audit and governance
+- **Cortex Agent** (`SNOWCORE_REVENUE_AGENT`) with 4 tools:
+  - Semantic model for natural language SQL over revenue data
+  - Cortex Search over competitor intelligence (SEC filings, earnings transcripts)
+  - Cortex Search over scenario research and definitions
+  - Pricing optimizer stored procedure
+- **Streaming chat** via SSE with the Cortex Agent API
+- **Monte Carlo engine** running 5,000+ path simulations in under 5 seconds
 
 ---
 
-## Technical Architecture
-
-### Built 100% on Snowflake
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         SNOWFLAKE PLATFORM                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐│
-│  │ Marketplace │  │ Yes Energy  │  │ RTO Insider │  │ SEC Filings ││
-│  │ NOAA/Census │  │ Fuel Prices │  │    News     │  │  Actuals    ││
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘│
-│         │                │                │                │        │
-│         └────────────────┼────────────────┼────────────────┘        │
-│                          ▼                ▼                         │
-│  ┌─────────────────────────────────────────────────────────────────┐│
-│  │                    ATOMIC SCHEMA (Raw Data)                     ││
-│  │  DAILY_WEATHER │ DAILY_COMMODITY │ MONTHLY_MACRO │ SHIPMENTS   ││
-│  └─────────────────────────────────────────────────────────────────┘│
-│                          │                                          │
-│                          ▼                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐│
-│  │                    ML SCHEMA (Intelligence)                     ││
-│  │  RUN_SIMULATION │ SENSITIVITY_ANALYSIS │ SCENARIO_DEFINITIONS  ││
-│  │         Python UDFs with NumPy/SciPy/Pandas                     ││
-│  └─────────────────────────────────────────────────────────────────┘│
-│                          │                                          │
-│                          ▼                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐│
-│  │                 ANALYTICS SCHEMA (Views)                        ││
-│  │  REVENUE_DRIVERS │ SCENARIO_TRIGGERS │ REGIONAL_PERFORMANCE    ││
-│  └─────────────────────────────────────────────────────────────────┘│
-│                          │                                          │
-│                          ▼                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐│
-│  │              SNOWPARK CONTAINER SERVICES (SPCS)                 ││
-│  │         React Frontend + FastAPI Backend + Nginx                ││
-│  │                  Cortex LLM + Cortex Search                     ││
-│  └─────────────────────────────────────────────────────────────────┘│
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+                        SNOWFLAKE PLATFORM
+ +-----------------------------------------------------------------+
+ |                                                                  |
+ |  DATA SOURCES                                                    |
+ |  [Marketplace: NOAA/Census] [Yes Energy] [RTO Insider] [SEC]    |
+ |       |                         |             |           |      |
+ |       +------------+------------+-------------+-----------+      |
+ |                     |                                            |
+ |                     v                                            |
+ |  +-----------------------------------------------------------+  |
+ |  |  ATOMIC SCHEMA                                             |  |
+ |  |  Monthly Shipments | Weather | Commodities | Macro Indicators |
+ |  +-----------------------------------------------------------+  |
+ |                     |                                            |
+ |                     v                                            |
+ |  +-----------------------------------------------------------+  |
+ |  |  ML SCHEMA                                                 |  |
+ |  |  RUN_SIMULATION | SENSITIVITY_ANALYSIS | SCENARIO_DEFS     |  |
+ |  |  PRICE_ELASTICITY | SIMULATION_RESULTS | CORTEX SEARCH     |  |
+ |  |  Cortex Agent | Semantic Model | Python UDFs (NumPy/SciPy) |  |
+ |  +-----------------------------------------------------------+  |
+ |                     |                                            |
+ |                     v                                            |
+ |  +-----------------------------------------------------------+  |
+ |  |  ANALYTICS SCHEMA                                          |  |
+ |  |  Pricing Opportunity | Competitive Landscape | Demand Panel |  |
+ |  +-----------------------------------------------------------+  |
+ |                     |                                            |
+ |                     v                                            |
+ |  +-----------------------------------------------------------+  |
+ |  |  SPCS (Snowpark Container Services)                        |  |
+ |  |  React 18 + TypeScript + Recharts (Frontend)               |  |
+ |  |  FastAPI + Python 3.11 (Backend)                           |  |
+ |  |  Nginx (Reverse Proxy + SSE Support)                       |  |
+ |  +-----------------------------------------------------------+  |
+ |                                                                  |
+ +-----------------------------------------------------------------+
 ```
 
 ### Tech Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Data Platform** | Snowflake | Unified data warehouse |
-| **Data Sources** | Marketplace + Yes Energy | External data integration |
-| **ML Engine** | Python UDFs (NumPy, SciPy) | Monte Carlo simulation |
-| **AI/LLM** | Cortex Complete + Cortex Search | Natural language intelligence |
-| **Frontend** | React + TypeScript + Recharts | Interactive visualization |
-| **Backend** | FastAPI + Python | API layer |
-| **Deployment** | SPCS (Docker + Nginx) | Secure, scalable hosting |
+| Layer | Technology | Details |
+|-------|-----------|---------|
+| **Data Platform** | Snowflake | Unified warehouse, Marketplace integration |
+| **AI/ML** | Cortex Agent, Cortex Search, Cortex Complete | Natural language queries, document search, LLM |
+| **Simulation** | Python UDFs (NumPy, SciPy, Pandas) | GBM + jump-diffusion Monte Carlo engine |
+| **Semantic Layer** | Cortex Analyst Semantic Model | YAML-defined metrics over revenue tables |
+| **Frontend** | React 18, TypeScript, Recharts, Tailwind CSS | 14-page SPA with dark theme |
+| **Backend** | FastAPI, Snowflake Connector | 25+ REST endpoints, SSE streaming |
+| **Deployment** | SPCS, Docker, Nginx | Multi-stage build, OAuth token auth |
 
 ---
 
 ## Data Sources
 
-### 6 Integrated Data Streams
+| Source | Provider | Frequency | Usage |
+|--------|----------|-----------|-------|
+| **Weather** | NOAA via Marketplace | Daily | Construction day calculations, seasonal adjustments |
+| **Construction Spending** | Census via Marketplace | Monthly | Macro demand indicators, scenario triggers |
+| **Energy Prices** | Yes Energy | Daily | Margin analysis, energy cost scenarios |
+| **Market News** | RTO Insider | Daily | AI knowledge base for market intelligence |
+| **Financial Actuals** | SEC 10-K/10-Q | Quarterly | Model calibration, competitive benchmarking |
+| **Operational Data** | Internal (Synthetic) | Monthly | Regional shipments, product segments, pricing |
 
-| Source | Provider | Update Frequency | Business Value |
-|--------|----------|------------------|----------------|
-| **Weather** | NOAA via Marketplace (Free) | Daily | Construction day calculations, seasonal adjustments |
-| **Construction Spending** | Census via Marketplace (Free) | Monthly | Macro demand indicators, scenario triggers |
-| **Energy Prices** | Yes Energy (Paid) | Daily | Margin analysis, energy cost scenarios |
-| **Market News** | RTO Insider | Daily | AI knowledge base, market intelligence |
-| **Financial Actuals** | SEC 10-K/10-Q | Quarterly | Model calibration, backtest validation |
-| **Operational Data** | Internal (Synthetic) | Monthly | Regional shipments, customer segments |
+---
 
-### Scenario Trigger Logic
+## Simulation Engine
 
-The platform automatically detects which scenarios are relevant based on current market conditions:
+13 pre-built scenarios across 5 categories:
 
-```sql
-IF gas_price < $3.00/MMBtu → Energy Tailwind scenario triggered
-IF gas_price > $6.00/MMBtu → Energy Squeeze scenario triggered
-IF highway_yoy_growth > 15% → Infrastructure Boom triggered
-IF residential_yoy_growth < -15% → Housing Slowdown triggered
-```
+| Category | Scenarios |
+|----------|-----------|
+| **Baseline** | Base Case, Mixed Signals |
+| **Bull** | Infrastructure Boom (IIJA +20%), Housing Recovery, Low Energy Costs |
+| **Bear** | Mild Recession, Housing Slowdown, Energy Cost Squeeze |
+| **Disruption** | Major Hurricane, California Wildfire, Texas Drought |
+| **Stress** | 2008 Housing Crash, Stagflation |
 
-See [DATA_SOURCES.md](DATA_SOURCES.md) for complete data lineage documentation.
+Each simulation outputs:
+- Terminal revenue distribution (mean, std)
+- VaR 95% and CVaR 95% for downside risk
+- P10 / P50 / P90 percentile outcomes
+- Full path distribution chart (5th, 25th, 50th, 75th, 95th percentiles over time)
+
+| Metric | Value |
+|--------|-------|
+| Paths per simulation | 5,000 (configurable to 50,000) |
+| Runtime | < 5 seconds |
+| Forecast horizon | 1-60 months |
+| Model types | GBM, Jump-Diffusion |
 
 ---
 
@@ -217,141 +155,120 @@ See [DATA_SOURCES.md](DATA_SOURCES.md) for complete data lineage documentation.
 
 ```
 vulcan_revenue_forecast/
-├── app/
-│   ├── ddl/                    # Database DDL scripts (001-009)
-│   ├── cortex/                 # Cortex Agent configuration
-│   ├── notebooks/              # Jupyter notebooks (4 notebooks)
-│   └── semantic_model/         # Semantic model YAML
-├── backend/
-│   ├── main.py                 # FastAPI application
-│   └── requirements.txt        # Python dependencies
-├── frontend/
-│   ├── src/
-│   │   ├── pages/              # React pages (10 pages)
-│   │   ├── App.tsx             # Main app with routing
-│   │   └── services/api.ts     # API client
-│   ├── package.json
-│   └── vite.config.ts
-├── deploy/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── deploy.sh
-├── docs/
-│   └── Vulcan Materials Revenue Forecast Methodology.docx
-├── Dockerfile                  # Production multi-stage build
-├── nginx.conf                  # Nginx configuration
-├── entrypoint.sh               # Container entrypoint
-├── DATA_SOURCES.md             # Complete data lineage
-├── PITCH.md                    # Executive pitch deck
-└── README.md                   # This file
++-- app/
+|   +-- ddl/                        # 15 DDL scripts (001-015)
+|   +-- cortex/                     # Cortex Agent configuration
+|   +-- notebooks/                  # 4 Jupyter notebooks
+|   |   +-- 01_revenue_forecast_comprehensive.ipynb
+|   |   +-- 02_monte_carlo_simulation.ipynb
+|   |   +-- 03_market_analysis.ipynb
+|   |   +-- 04_risk_modeling.ipynb
+|   +-- semantic_model/             # Semantic model YAML
+|       +-- snowcore_revenue_model.yaml
+|       +-- vulcan_revenue_model.yaml
++-- backend/
+|   +-- main.py                     # FastAPI app (25+ endpoints)
+|   +-- requirements.txt
++-- frontend/
+|   +-- src/
+|   |   +-- pages/                  # 14 React pages
+|   |   +-- App.tsx                 # Routing and layout
+|   |   +-- services/api.ts         # API client
+|   +-- index.html
+|   +-- package.json
+|   +-- vite.config.ts
++-- deploy/
+|   +-- Dockerfile                  # Multi-stage build
+|   +-- nginx.conf                  # Nginx with SSE proxy support
+|   +-- deploy.sh
++-- data/                           # Source data files
++-- docs/                           # Methodology documentation
++-- scripts/                        # Utility scripts
++-- DATA_SOURCES.md                 # Complete data lineage
++-- PITCH.md                        # Executive pitch
++-- README.md
 ```
 
 ---
 
-## Business Value
+## Deployment
 
-### For Finance Teams
+### SPCS Deployment
 
-| Before GRANITE | After GRANITE |
-|----------------|---------------|
-| Single-point revenue forecast | Full probability distribution with P10/P50/P90 |
-| Quarterly scenario updates | Real-time scenario triggers based on market data |
-| "Trust me" risk assessment | Quantified VaR and CVaR for downside planning |
-| Days to run what-if analysis | Seconds to simulate 5,000 paths |
+The app deploys as a single Docker container to Snowpark Container Services with Nginx reverse-proxying to FastAPI.
 
-### For Operations Teams
+```bash
+# Build the image (must target linux/amd64 for SPCS)
+docker build --platform linux/amd64 -t granite:v2.1 -f deploy/Dockerfile .
 
-| Before GRANITE | After GRANITE |
-|----------------|---------------|
-| Reactive weather response | Proactive construction day forecasting |
-| Regional silos | Unified view of all 6 regions |
-| Manual energy cost tracking | Automated margin impact analysis |
-| Tribal knowledge | Searchable AI knowledge base |
+# Tag and push to SPCS image registry
+docker tag granite:v2.1 <registry>/vulcan_materials_db/ml/images/granite:v2.1
+docker push <registry>/vulcan_materials_db/ml/images/granite:v2.1
 
-### For Executive Leadership
+# Create or update the service via ALTER SERVICE
+ALTER SERVICE VULCAN_MATERIALS_DB.ML.GRANITE_SERVICE_V2
+  FROM SPECIFICATION $$
+  {
+    "spec": {
+      "containers": [{
+        "name": "granite",
+        "image": "/vulcan_materials_db/ml/images/granite:v2.1"
+      }],
+      "endpoints": [{
+        "name": "app",
+        "port": 80,
+        "public": true
+      }]
+    }
+  }
+  $$;
+```
 
-| Before GRANITE | After GRANITE |
-|----------------|---------------|
-| "What's our downside?" → "We don't know" | "95% confidence of exceeding $7.2B" |
-| Scenario planning in board packets | Live scenario comparison in meetings |
-| Analyst-dependent insights | Self-service intelligence platform |
+### Local Development
 
----
+```bash
+# Frontend (port 5173)
+cd frontend
+npm install
+npm run dev
 
-## Why Snowflake?
-
-| Capability | Benefit |
-|------------|---------|
-| **Marketplace** | Instant access to NOAA, Census, Yes Energy data |
-| **Python UDFs** | Run sophisticated simulations without moving data |
-| **Cortex AI** | Built-in LLM and search - no external APIs needed |
-| **SPCS** | Deploy full-stack apps inside Snowflake's security perimeter |
-| **Governance** | Complete data lineage and access control |
-| **Scalability** | Warehouse compute scales with simulation complexity |
-
-### Security & Compliance
-
-- All data stays in Snowflake - no external data movement
-- SPCS runs inside customer's Snowflake account
-- Role-based access control inherited from Snowflake
-- Full audit trail of all queries and simulations
-
----
-
-## Roadmap
-
-### Phase 1: Foundation (Completed)
-- [x] Data ingestion from Marketplace + Yes Energy
-- [x] Monte Carlo simulation engine (Python UDFs)
-- [x] 13 scenario definitions with triggers
-- [x] React frontend with SPCS deployment
-- [x] Cortex Search knowledge base
-
-### Phase 2: Enhancement (Next)
-- [ ] Real Vulcan shipment data integration
-- [ ] Automated model retraining pipeline
-- [ ] Custom scenario builder
-- [ ] Email/Slack alerts on scenario triggers
-- [ ] Mobile-responsive dashboard
-
-### Phase 3: Advanced (Future)
-- [ ] ML-based scenario probability estimation
-- [ ] Competitor intelligence integration
-- [ ] Supply chain optimization module
-- [ ] Board reporting automation
+# Backend (port 8000)
+cd backend
+pip install -r requirements.txt
+SNOWFLAKE_CONNECTION_NAME=my_snowflake uvicorn main:app --reload
+```
 
 ---
 
-## Performance Metrics
+## Snowflake Objects
 
-### Simulation Engine
+### Database: `SNOWCORE_MATERIALS_DB`
 
-| Metric | Value |
-|--------|-------|
-| Paths per simulation | 5,000 (configurable to 50,000) |
-| Simulation runtime | < 5 seconds |
-| Forecast horizon | 1-60 months |
-| Scenarios available | 13 (expandable) |
-| Sensitivity parameters | 5 (drift, volatility, shocks, growth rates) |
+| Schema | Key Objects |
+|--------|------------|
+| **ATOMIC** | `MONTHLY_SHIPMENTS`, `SALES_REGION`, `PRODUCT_SEGMENT`, `MONTHLY_WEATHER_BY_REGION`, `DAILY_COMMODITY_PRICES`, `MONTHLY_MACRO_INDICATORS`, `MONTHLY_ENERGY_PRICE_INDEX` |
+| **ML** | `RUN_SIMULATION` (proc), `RUN_SENSITIVITY_ANALYSIS` (proc), `SP_OPTIMIZE_PRICING` (proc), `SCENARIO_DEFINITIONS`, `SIMULATION_RESULTS`, `PRICE_ELASTICITY`, `ELASTICITY_MATRIX`, `MODEL_COMPARISON`, `SCENARIO_SEARCH_SERVICE` (Cortex Search) |
+| **ANALYTICS** | `PRICING_OPPORTUNITY`, `COMPETITIVE_LANDSCAPE`, `QUARRY_COMPETITIVE_MAP`, `COMPETITOR_REVENUE_TREND`, `DEMAND_DRIVERS_PANEL` |
+| **DOCS** | `COMPETITOR_INTEL_SEARCH` (Cortex Search) |
 
-### Data Freshness
+### Cortex AI Services
 
-| Source | Latency |
-|--------|---------|
-| Weather (NOAA) | T+1 day |
-| Energy (Yes Energy) | T+1 day |
-| Macro (Census) | T+30 days |
-| News (RTO Insider) | Real-time |
+| Service | Type | Details |
+|---------|------|---------|
+| `SNOWCORE_REVENUE_AGENT` | Cortex Agent | 4 tools: semantic model, 2 search services, pricing optimizer |
+| `SCENARIO_SEARCH_SERVICE` | Cortex Search | 18 documents covering scenario definitions and research |
+| `COMPETITOR_INTEL_SEARCH` | Cortex Search | 22 documents from SEC filings and earnings transcripts |
+| `snowcore_revenue_model.yaml` | Semantic Model | Revenue metrics, dimensions, and time grains for Cortex Analyst |
 
 ---
 
-## Contributing
+## Key Deployment Notes
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- `CREATE DATABASE CLONE` does **not** clone internal stages, Cortex Search services, or Cortex Agents. These must be recreated manually.
+- `CREATE DATABASE CLONE` also does **not** rewrite hardcoded database references inside stored procedure bodies. All cloned procedures must be patched with the new database name.
+- SPCS caches the `:latest` Docker tag. Always use unique version tags (e.g., `:v2.1`).
+- `ALTER SERVICE` preserves the endpoint URL; `DROP` + `CREATE` generates a new one.
+- The Cortex Agent uses `$$` delimiters (not `$spec$`) and does not support `QUERY_WAREHOUSE` as a top-level property.
 
 ---
 
@@ -361,17 +278,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## Acknowledgments
-
-- **Snowflake** - Platform and Cortex AI
-- **Yes Energy** - Fuel price data
-- **RTO Insider** - Energy news content
-- **Vulcan Materials** - Domain expertise and SEC filings
-
----
-
-**GRANITE: Vulcan Revenue Intelligence Platform**
-
-Built on Snowflake | Powered by Cortex AI | Deployed on SPCS
-
-*"From data to decisions in seconds, not weeks."*
+**SnowCore Revenue Intelligence** | Built on Snowflake | Powered by Cortex AI | Deployed on SPCS

@@ -10,7 +10,12 @@ import {
   Truck,
   CloudRain,
   Brain,
-  Database
+  Database,
+  TrendingUp,
+  Target,
+  Users,
+  GitCompare,
+  Swords
 } from 'lucide-react';
 
 import Landing from './pages/Landing';
@@ -23,19 +28,59 @@ import RegionMap from './pages/RegionMap';
 import Shipments from './pages/Shipments';
 import WeatherRisk from './pages/WeatherRisk';
 import DataExplorer from './pages/DataExplorer';
+import DemandSensing from './pages/DemandSensing';
+import PricingCenter from './pages/PricingCenter';
+import CompetitiveIntel from './pages/CompetitiveIntel';
+import RiskComparison from './pages/RiskComparison';
+import BoardRoom from './pages/BoardRoom';
 
 const queryClient = new QueryClient();
 
-const navItems = [
-  { path: '/dashboard', icon: LayoutDashboard, label: 'Mission Control' },
-  { path: '/scenarios', icon: BarChart3, label: 'Scenarios' },
-  { path: '/sensitivity', icon: Activity, label: 'Sensitivity' },
-  { path: '/revenue', icon: DollarSign, label: 'Revenue Deep Dive' },
-  { path: '/regions', icon: Map, label: 'Region Map' },
-  { path: '/shipments', icon: Truck, label: 'Shipments' },
-  { path: '/weather', icon: CloudRain, label: 'Weather Risk' },
-  { path: '/knowledge', icon: Brain, label: 'Knowledge Base' },
-  { path: '/data', icon: Database, label: 'Data Explorer' },
+interface NavSection {
+  label: string;
+  items: { path: string; icon: React.ElementType; label: string }[];
+}
+
+const navSections: NavSection[] = [
+  {
+    label: 'INTELLIGENCE',
+    items: [
+      { path: '/dashboard', icon: LayoutDashboard, label: 'Mission Control' },
+      { path: '/revenue', icon: DollarSign, label: 'Revenue Deep Dive' },
+      { path: '/regions', icon: Map, label: 'Region Map' },
+      { path: '/shipments', icon: Truck, label: 'Shipments' },
+    ],
+  },
+  {
+    label: 'PRICING & DEMAND',
+    items: [
+      { path: '/demand', icon: TrendingUp, label: 'Demand Sensing' },
+      { path: '/pricing', icon: Target, label: 'Pricing Center' },
+      { path: '/competitive', icon: Users, label: 'Competitive Intel' },
+    ],
+  },
+  {
+    label: 'RISK & SIMULATION',
+    items: [
+      { path: '/scenarios', icon: BarChart3, label: 'Scenarios' },
+      { path: '/sensitivity', icon: Activity, label: 'Sensitivity' },
+      { path: '/risk-comparison', icon: GitCompare, label: 'Risk Comparison' },
+    ],
+  },
+  {
+    label: 'STRATEGY',
+    items: [
+      { path: '/boardroom', icon: Swords, label: 'Board Room' },
+    ],
+  },
+  {
+    label: 'REFERENCE',
+    items: [
+      { path: '/weather', icon: CloudRain, label: 'Weather Risk' },
+      { path: '/knowledge', icon: Brain, label: 'Knowledge Base' },
+      { path: '/data', icon: Database, label: 'Data Explorer' },
+    ],
+  },
 ];
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -43,34 +88,43 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
-      <nav className="fixed top-0 left-0 h-screen w-64 bg-slate-800 border-r border-slate-700 p-4">
+      <nav className="fixed top-0 left-0 h-screen w-64 bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto">
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center gap-3 mb-8 px-2 hover:opacity-80 transition-opacity cursor-pointer w-full text-left"
+          className="flex items-center gap-3 mb-6 px-2 hover:opacity-80 transition-opacity cursor-pointer w-full text-left"
         >
           <Mountain className="w-8 h-8 text-amber-400" />
           <div>
             <h1 className="text-lg font-bold">GRANITE</h1>
-            <p className="text-xs text-slate-400">Vulcan Revenue Intelligence</p>
+            <p className="text-xs text-slate-400">SnowCore Revenue Intelligence</p>
           </div>
         </button>
         
-        <div className="space-y-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-amber-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700'
-                }`
-              }
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-sm font-medium">{item.label}</span>
-            </NavLink>
+        <div className="space-y-4">
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <p className="text-[10px] font-semibold text-slate-500 tracking-wider px-3 mb-1">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-amber-600 text-white'
+                          : 'text-slate-300 hover:bg-slate-700'
+                      }`
+                    }
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
         
@@ -112,6 +166,11 @@ function AppRoutes() {
         <Route path="/weather" element={<WeatherRisk />} />
         <Route path="/knowledge" element={<KnowledgeBase />} />
         <Route path="/data" element={<DataExplorer />} />
+        <Route path="/demand" element={<DemandSensing />} />
+        <Route path="/pricing" element={<PricingCenter />} />
+        <Route path="/competitive" element={<CompetitiveIntel />} />
+        <Route path="/risk-comparison" element={<RiskComparison />} />
+        <Route path="/boardroom" element={<BoardRoom />} />
       </Routes>
     </AppLayout>
   );

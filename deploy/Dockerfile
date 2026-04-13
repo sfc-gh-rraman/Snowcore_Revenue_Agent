@@ -1,9 +1,3 @@
-# GRANITE Vulcan Revenue Intelligence - SPCS Container
-# Multi-stage build: React frontend + FastAPI backend
-
-# =============================================================================
-# Stage 1: Build React Frontend
-# =============================================================================
 FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app/frontend
@@ -16,9 +10,6 @@ COPY frontend/ ./
 
 RUN npm run build
 
-# =============================================================================
-# Stage 2: Production Runtime
-# =============================================================================
 FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y \
@@ -41,15 +32,14 @@ RUN mkdir -p /var/log/nginx
 
 RUN echo '#!/bin/bash\n\
 set -e\n\
-echo "=== GRANITE VULCAN REVENUE INTELLIGENCE STARTUP ===" \n\
-echo "Python version: $(python --version)" \n\
-echo "Working directory: $(pwd)" \n\
-echo "SNOWFLAKE_HOST: ${SNOWFLAKE_HOST:-NOT_SET}" \n\
-echo "Token file exists: $(test -f /snowflake/session/token && echo YES || echo NO)" \n\
-echo "Starting nginx..." \n\
-nginx \n\
-echo "Starting uvicorn..." \n\
-exec python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --log-level info \n\
+echo "=== SNOWCORE REVENUE INTELLIGENCE STARTUP ==="\n\
+echo "Python version: $(python --version)"\n\
+echo "SNOWFLAKE_HOST: ${SNOWFLAKE_HOST:-NOT_SET}"\n\
+echo "Token file exists: $(test -f /snowflake/session/token && echo YES || echo NO)"\n\
+echo "Starting nginx..."\n\
+nginx\n\
+echo "Starting uvicorn..."\n\
+exec python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --log-level info\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 EXPOSE 8080

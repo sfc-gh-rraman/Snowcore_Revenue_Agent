@@ -1,49 +1,47 @@
 # =============================================================================
-# Cortex Analyst Semantic Model
-# Vulcan Materials Revenue Forecast Platform
+# Cortex Analyst Semantic Model — GRANITE v2.2
+# SnowCore Materials Revenue Intelligence Platform
 # =============================================================================
 
 name: vulcan_revenue_model
 description: >
-  Semantic model for Vulcan Materials revenue forecasting and analysis.
-  Enables natural language queries about shipment volumes, pricing, margins,
-  weather impacts, and Monte Carlo forecast results. Supports the "Hidden Discovery"
-  pattern detection for systemic risk identification.
+  Semantic model for SnowCore Materials (Vulcan) revenue intelligence platform.
+  Covers shipment volumes, product segments, pricing, margins, elasticity,
+  optimal pricing, copula risk analytics, competitor quarry intelligence,
+  and model comparison (naive vs copula).
 
 tables:
   # ============================================
   # MONTHLY_SHIPMENTS - Primary volume data
   # ============================================
   - name: monthly_shipments
-    description: Monthly aggregate shipment volumes by region and customer segment.
+    description: Monthly aggregate shipment volumes by region, product, and customer segment. Primary fact table with 2,664 rows (6 products x 6 regions x 74 months).
     base_table:
       database: VULCAN_MATERIALS_DB
       schema: ATOMIC
       table: MONTHLY_SHIPMENTS
     primary_key:
-      columns: [REGION_CODE, PRODUCT_SEGMENT_CODE, CUSTOMER_SEGMENT_CODE, YEAR_MONTH]
+      columns: [shipment_id]
 
     dimensions:
+      - name: shipment_id
+        description: Unique shipment record identifier (identity column).
+        expr: SHIPMENT_ID
+        data_type: NUMBER
+
       - name: region_code
         synonyms: ["region", "market", "geography", "territory"]
-        description: Geographic sales region (TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS).
+        description: Geographic sales region.
         expr: REGION_CODE
         data_type: TEXT
-        sample_values: ["TEXAS", "SOUTHEAST", "FLORIDA", "CALIFORNIA", "VIRGINIA", "ILLINOIS"]
+        sample_values: ["TEXAS", "SOUTHEAST", "FLORIDA", "CALIFORNIA", "VIRGINIA", "ILLINOIS", "MEXICO"]
 
-      - name: product_segment
-        synonyms: ["product", "material", "aggregate type"]
-        description: Product segment code.
+      - name: product_segment_code
+        synonyms: ["product", "material", "aggregate type", "product line", "product segment"]
+        description: Product segment code. V1 products (AGG_STONE, AGG_SAND, AGG_SPECIALTY) are core aggregates. V2 products (ASPHALT_MIX, CONCRETE_RMX, SERVICE_LOGISTICS) are downstream.
         expr: PRODUCT_SEGMENT_CODE
         data_type: TEXT
-        sample_values: ["AGG_STONE", "AGG_SAND", "ASPHALT_MIX", "CONCRETE_RMX"]
-
-      - name: customer_segment
-        synonyms: ["customer", "end market", "sector"]
-        description: Customer segment (public/private breakdown).
-        expr: CUSTOMER_SEGMENT_CODE
-        data_type: TEXT
-        sample_values: ["PUBLIC_HIGHWAY", "PRIVATE_COMMERCIAL", "PRIVATE_RESIDENTIAL"]
+        sample_values: ["AGG_STONE", "AGG_SAND", "AGG_SPECIALTY", "ASPHALT_MIX", "CONCRETE_RMX", "SERVICE_LOGISTICS"]
 
     time_dimensions:
       - name: year_month
@@ -84,12 +82,6 @@ tables:
         expr: PRICE_PER_TON
         data_type: NUMBER
 
-      - name: weather_impact_days
-        synonyms: ["weather days", "lost days"]
-        description: Days lost to weather in the month.
-        expr: WEATHER_IMPACT_DAYS
-        data_type: NUMBER
-
     metrics:
       - name: total_tons
         synonyms: ["total volume", "total shipments"]
@@ -106,70 +98,57 @@ tables:
         description: Average price per ton.
         expr: SUM(monthly_shipments.REVENUE_USD) / NULLIF(SUM(monthly_shipments.SHIPMENT_TONS), 0)
 
-      - name: yoy_volume_growth
-        description: Year-over-year volume growth percentage.
-        expr: AVG(monthly_shipments.YOY_VOLUME_CHANGE_PCT)
-
   # ============================================
-  # MONTHLY_PRICING - Pricing and margins
+  # PRODUCT_SEGMENT - Product reference data
   # ============================================
-  - name: monthly_pricing
-    description: Monthly pricing and margin metrics by region.
+  - name: product_segment
+    description: Product segment reference table with 6 product lines, benchmark pricing, and margin targets.
     base_table:
       database: VULCAN_MATERIALS_DB
       schema: ATOMIC
-      table: MONTHLY_PRICING
+      table: PRODUCT_SEGMENT
     primary_key:
-      columns: [REGION_CODE, PRODUCT_SEGMENT_CODE, YEAR_MONTH]
+      columns: [segment_code]
 
     dimensions:
-      - name: region_code
-        synonyms: ["region", "market"]
-        description: Geographic sales region.
-        expr: REGION_CODE
+      - name: segment_code
+        synonyms: ["product code", "product segment code"]
+        description: Product segment code used as join key across tables.
+        expr: SEGMENT_CODE
         data_type: TEXT
+        sample_values: ["AGG_STONE", "AGG_SAND", "AGG_SPECIALTY", "ASPHALT_MIX", "CONCRETE_RMX", "SERVICE_LOGISTICS"]
 
-    time_dimensions:
-      - name: year_month
-        synonyms: ["month", "period"]
-        description: Month of the pricing data.
-        expr: YEAR_MONTH
-        data_type: DATE
+      - name: segment_name
+        synonyms: ["product name", "material name"]
+        description: Human-readable product name.
+        expr: SEGMENT_NAME
+        data_type: TEXT
+        sample_values: ["Crushed Stone", "Sand & Gravel", "Specialty Aggregates", "Asphalt Mix", "Ready-Mix Concrete", "Service & Logistics"]
+
+      - name: segment_type
+        synonyms: ["product category", "business line"]
+        description: Product category grouping.
+        expr: SEGMENT_TYPE
+        data_type: TEXT
+        sample_values: ["AGGREGATES", "ASPHALT", "CONCRETE", "SERVICE"]
+
+      - name: is_primary_business
+        description: Whether this is a core aggregates product (TRUE) or downstream (FALSE).
+        expr: IS_PRIMARY_BUSINESS
+        data_type: BOOLEAN
 
     facts:
-      - name: freight_adjusted_price
-        synonyms: ["fob price", "net price", "realized price"]
-        description: Freight-adjusted price per ton (key Vulcan metric).
-        expr: FREIGHT_ADJUSTED_PRICE
+      - name: avg_price_per_ton
+        synonyms: ["benchmark price", "list price"]
+        description: Benchmark average price per ton for the product.
+        expr: AVG_PRICE_PER_TON
         data_type: NUMBER
 
-      - name: cash_gross_profit_per_ton
-        synonyms: ["cash gp", "margin per ton", "unit margin"]
-        description: Cash gross profit per ton (excludes D&D).
-        expr: CASH_GROSS_PROFIT_PER_TON
+      - name: avg_margin_pct
+        synonyms: ["target margin", "benchmark margin"]
+        description: Benchmark average margin percentage.
+        expr: AVG_MARGIN_PCT
         data_type: NUMBER
-
-      - name: cash_cost_per_ton
-        synonyms: ["unit cost", "cost per ton"]
-        description: Cash cost per ton.
-        expr: CASH_COST_PER_TON
-        data_type: NUMBER
-
-      - name: yoy_price_change
-        synonyms: ["price increase", "price growth"]
-        description: Year-over-year price change percentage.
-        expr: YOY_PRICE_CHANGE_PCT
-        data_type: NUMBER
-
-    metrics:
-      - name: avg_cash_gp
-        synonyms: ["average margin"]
-        description: Average cash gross profit per ton.
-        expr: AVG(monthly_pricing.CASH_GROSS_PROFIT_PER_TON)
-
-      - name: margin_pct
-        description: Gross margin percentage.
-        expr: AVG(monthly_pricing.CASH_GROSS_PROFIT_PER_TON / NULLIF(monthly_pricing.FREIGHT_ADJUSTED_PRICE, 0)) * 100
 
   # ============================================
   # SALES_REGION - Region reference data
@@ -181,7 +160,7 @@ tables:
       schema: ATOMIC
       table: SALES_REGION
     primary_key:
-      columns: [REGION_CODE]
+      columns: [region_code]
 
     dimensions:
       - name: region_code
@@ -219,13 +198,13 @@ tables:
   # DAILY_COMMODITY_PRICES - Input costs
   # ============================================
   - name: commodity_prices
-    description: Daily commodity price data for key inputs.
+    description: Daily commodity price data. Only natural gas (Henry Hub) is reliably populated.
     base_table:
       database: VULCAN_MATERIALS_DB
       schema: ATOMIC
       table: DAILY_COMMODITY_PRICES
     primary_key:
-      columns: [PRICE_DATE]
+      columns: [price_date]
 
     time_dimensions:
       - name: price_date
@@ -235,216 +214,693 @@ tables:
         data_type: DATE
 
     facts:
-      - name: diesel_price
-        synonyms: ["diesel", "fuel price"]
-        description: Diesel price (Gulf Coast) in $/gallon.
-        expr: DIESEL_GULF_COAST
-        data_type: NUMBER
-
-      - name: liquid_asphalt
-        synonyms: ["asphalt", "AC price"]
-        description: Liquid asphalt cement price in $/ton.
-        expr: LIQUID_ASPHALT_GULF
-        data_type: NUMBER
-
-      - name: cement_ppi
-        synonyms: ["cement", "cement index"]
-        description: Cement Producer Price Index.
-        expr: CEMENT_PPI
-        data_type: NUMBER
-
       - name: natural_gas
-        synonyms: ["gas", "nat gas"]
+        synonyms: ["gas", "nat gas", "henry hub"]
         description: Natural gas price (Henry Hub) in $/MMBtu.
         expr: NATURAL_GAS_HENRY_HUB
         data_type: NUMBER
 
     metrics:
-      - name: avg_diesel
-        description: Average diesel price.
-        expr: AVG(commodity_prices.DIESEL_GULF_COAST)
-
-      - name: avg_asphalt
-        description: Average liquid asphalt price.
-        expr: AVG(commodity_prices.LIQUID_ASPHALT_GULF)
+      - name: avg_gas_price
+        description: Average natural gas price.
+        expr: AVG(commodity_prices.NATURAL_GAS_HENRY_HUB)
 
   # ============================================
-  # REVENUE_FORECAST - Monte Carlo predictions
+  # PRICE_ELASTICITY - Demand elasticity estimates
   # ============================================
-  - name: revenue_forecast
-    description: Monte Carlo simulation revenue forecasts.
+  - name: price_elasticity
+    description: Own-price elasticity estimates by product segment. Trained via OLS regression. |elasticity| < 1 means inelastic (pricing power), > 1 means elastic (volume risk).
     base_table:
       database: VULCAN_MATERIALS_DB
       schema: ML
-      table: REVENUE_FORECAST
+      table: PRICE_ELASTICITY
     primary_key:
-      columns: [FORECAST_ID]
+      columns: [elasticity_id]
+
+    dimensions:
+      - name: elasticity_id
+        description: Unique identifier for the elasticity estimate.
+        expr: ELASTICITY_ID
+        data_type: NUMBER
+
+      - name: product_segment_code
+        synonyms: ["product", "material"]
+        description: Product segment for which elasticity was estimated.
+        expr: PRODUCT_SEGMENT_CODE
+        data_type: TEXT
+        sample_values: ["AGG_STONE", "AGG_SAND", "AGG_SPECIALTY", "ASPHALT_MIX", "CONCRETE_RMX", "SERVICE_LOGISTICS"]
+
+      - name: region_code
+        synonyms: ["region"]
+        description: Region code. ALL means the national average elasticity.
+        expr: REGION_CODE
+        data_type: TEXT
+        sample_values: ["ALL", "TEXAS", "SOUTHEAST", "FLORIDA", "CALIFORNIA", "VIRGINIA", "ILLINOIS"]
+
+      - name: model_version
+        description: Model version (v1 or v2).
+        expr: MODEL_VERSION
+        data_type: TEXT
+
+    facts:
+      - name: own_elasticity
+        synonyms: ["elasticity", "price sensitivity", "demand elasticity"]
+        description: Own-price elasticity of demand. Negative means normal (price up → volume down). Magnitude < 1 is inelastic (pricing power), > 1 is elastic (volume risk).
+        expr: OWN_ELASTICITY
+        data_type: NUMBER
+
+      - name: r_squared
+        synonyms: ["R2", "goodness of fit", "model fit"]
+        description: R-squared of the elasticity regression. Higher = better fit. V2 downstream products typically R² > 0.8.
+        expr: R_SQUARED
+        data_type: NUMBER
+
+      - name: p_value
+        description: P-value for the elasticity coefficient. < 0.05 is statistically significant.
+        expr: P_VALUE
+        data_type: NUMBER
+
+      - name: n_observations
+        synonyms: ["sample size"]
+        description: Number of observations used in estimation.
+        expr: N_OBSERVATIONS
+        data_type: NUMBER
+
+  # ============================================
+  # ELASTICITY_MATRIX - Cross-elasticities
+  # ============================================
+  - name: elasticity_matrix
+    description: Cross-price elasticity matrix showing substitution/complement relationships between products. Positive cross-elasticity = substitutes, negative = complements.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: ELASTICITY_MATRIX
+    primary_key:
+      columns: [matrix_id]
+
+    dimensions:
+      - name: matrix_id
+        description: Unique identifier for the cross-elasticity row.
+        expr: MATRIX_ID
+        data_type: NUMBER
+
+      - name: product_i
+        synonyms: ["from product", "source product"]
+        description: The product whose demand is affected.
+        expr: PRODUCT_I
+        data_type: TEXT
+
+      - name: product_j
+        synonyms: ["to product", "affecting product"]
+        description: The product whose price changed.
+        expr: PRODUCT_J
+        data_type: TEXT
+
+      - name: relationship_type
+        synonyms: ["substitute or complement"]
+        description: Whether the products are OWN, SUBSTITUTE, or COMPLEMENT based on cross-elasticity sign.
+        expr: RELATIONSHIP_TYPE
+        data_type: TEXT
+        sample_values: ["OWN", "SUBSTITUTE", "COMPLEMENT"]
+
+    facts:
+      - name: cross_elasticity
+        synonyms: ["cross price elasticity"]
+        description: Cross-price elasticity. Positive means product_i demand rises when product_j price rises (substitutes).
+        expr: CROSS_ELASTICITY
+        data_type: NUMBER
+
+      - name: p_value
+        description: Statistical significance of the cross-elasticity estimate.
+        expr: P_VALUE
+        data_type: NUMBER
+
+  # ============================================
+  # OPTIMAL_PRICING - Price optimization results
+  # ============================================
+  - name: optimal_pricing
+    description: Constrained price optimization results by product and region. Shows current vs optimal price, predicted profit delta, and which constraints bind.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: OPTIMAL_PRICING
+    primary_key:
+      columns: [pricing_id]
+
+    dimensions:
+      - name: pricing_id
+        description: Unique row identifier for pricing optimization result.
+        expr: PRICING_ID
+        data_type: NUMBER
+
+      - name: region_code
+        synonyms: ["region"]
+        description: Sales region for pricing.
+        expr: REGION_CODE
+        data_type: TEXT
+
+      - name: product_segment_code
+        synonyms: ["product"]
+        description: Product segment code.
+        expr: PRODUCT_SEGMENT_CODE
+        data_type: TEXT
+
+      - name: model_version
+        description: Optimizer model version.
+        expr: MODEL_VERSION
+        data_type: TEXT
+
+      - name: optimizer_status
+        description: Whether the optimizer converged successfully.
+        expr: OPTIMIZER_STATUS
+        data_type: TEXT
+
+    facts:
+      - name: current_price
+        synonyms: ["actual price", "today's price"]
+        description: Current average selling price per ton.
+        expr: CURRENT_PRICE
+        data_type: NUMBER
+
+      - name: optimal_price
+        synonyms: ["recommended price", "best price"]
+        description: Optimizer-recommended price per ton that maximizes profit within constraints.
+        expr: OPTIMAL_PRICE
+        data_type: NUMBER
+
+      - name: price_delta_pct
+        synonyms: ["price change", "price gap"]
+        description: Percentage difference between optimal and current price. Positive means the optimizer recommends raising price.
+        expr: PRICE_DELTA_PCT
+        data_type: NUMBER
+
+      - name: current_profit
+        synonyms: ["current margin dollars"]
+        description: Current profit in USD at current prices.
+        expr: CURRENT_PROFIT
+        data_type: NUMBER
+
+      - name: optimal_profit
+        synonyms: ["achievable profit"]
+        description: Predicted profit in USD at optimal prices.
+        expr: OPTIMAL_PROFIT
+        data_type: NUMBER
+
+      - name: profit_delta
+        synonyms: ["profit gap", "profit opportunity", "money left on the table"]
+        description: Incremental profit available by moving to optimal prices. Positive = profit opportunity.
+        expr: PROFIT_DELTA
+        data_type: NUMBER
+
+      - name: profit_delta_pct
+        description: Profit improvement as a percentage of current profit.
+        expr: PROFIT_DELTA_PCT
+        data_type: NUMBER
+
+    metrics:
+      - name: total_profit_opportunity
+        synonyms: ["total money on the table"]
+        description: Sum of profit delta across all products and regions.
+        expr: SUM(optimal_pricing.PROFIT_DELTA)
+
+  # ============================================
+  # COPULA_PARAMETERS - Joint risk model config
+  # ============================================
+  - name: copula_parameters
+    description: Copula model parameters used for correlated Monte Carlo simulation. Captures the joint dependence structure between risk factors (volume, price, energy, construction, weather).
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: COPULA_PARAMETERS
+    primary_key:
+      columns: [param_id]
+
+    dimensions:
+      - name: param_id
+        description: Unique identifier for copula parameter set.
+        expr: PARAM_ID
+        data_type: NUMBER
+
+      - name: copula_type
+        synonyms: ["copula", "dependence model"]
+        description: Type of copula (gaussian or student-t). Gaussian has zero tail dependence; t-copula captures joint extreme events.
+        expr: COPULA_TYPE
+        data_type: TEXT
+        sample_values: ["gaussian", "student_t"]
+
+      - name: model_version
+        description: Model version (v1=3 variables, v2=5 variables).
+        expr: MODEL_VERSION
+        data_type: TEXT
+
+    facts:
+      - name: degrees_of_freedom
+        synonyms: ["df"]
+        description: Degrees of freedom for Student-t copula. NULL for Gaussian. Lower df = heavier tails.
+        expr: DEGREES_OF_FREEDOM
+        data_type: NUMBER
+
+      - name: tail_dependence_lower
+        synonyms: ["lower tail dependence", "crash correlation"]
+        description: Lower tail dependence coefficient. Higher means more correlated extreme losses.
+        expr: TAIL_DEPENDENCE_LOWER
+        data_type: NUMBER
+
+      - name: tail_dependence_upper
+        synonyms: ["upper tail dependence"]
+        description: Upper tail dependence coefficient.
+        expr: TAIL_DEPENDENCE_UPPER
+        data_type: NUMBER
+
+      - name: aic
+        description: Akaike Information Criterion. Lower is better for model selection.
+        expr: AIC
+        data_type: NUMBER
+
+      - name: bic
+        description: Bayesian Information Criterion. Lower is better. Used to select between copula types.
+        expr: BIC
+        data_type: NUMBER
+
+      - name: n_observations
+        synonyms: ["sample size"]
+        description: Number of monthly observations used to fit the copula.
+        expr: N_OBSERVATIONS
+        data_type: NUMBER
+
+  # ============================================
+  # MODEL_COMPARISON - Naive vs Copula risk
+  # ============================================
+  - name: model_comparison
+    description: Side-by-side comparison of naive (independent) vs copula (correlated) Monte Carlo risk metrics. The gap reveals how much tail risk is hidden when ignoring joint dependence.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ML
+      table: MODEL_COMPARISON
+    primary_key:
+      columns: [comparison_id]
+
+    dimensions:
+      - name: comparison_id
+        description: Unique identifier for the model comparison row.
+        expr: COMPARISON_ID
+        data_type: NUMBER
+
+      - name: scenario_id
+        synonyms: ["scenario", "case"]
+        description: Scenario identifier (e.g., BASE_CASE, BASE_CASE_V2).
+        expr: SCENARIO_ID
+        data_type: TEXT
+
+    facts:
+      - name: naive_p50
+        synonyms: ["naive median"]
+        description: Median (P50) revenue from naive independent simulation, in USD.
+        expr: NAIVE_P50
+        data_type: NUMBER
+
+      - name: naive_var_95
+        synonyms: ["naive VaR", "naive value at risk"]
+        description: 95% Value at Risk from naive simulation, in USD. Represents worst-case loss at 95% confidence assuming independent risks.
+        expr: NAIVE_VAR_95
+        data_type: NUMBER
+
+      - name: naive_cvar_95
+        synonyms: ["naive CVaR", "naive expected shortfall"]
+        description: 95% Conditional VaR (expected shortfall) from naive simulation, in USD.
+        expr: NAIVE_CVAR_95
+        data_type: NUMBER
+
+      - name: copula_p50
+        synonyms: ["copula median"]
+        description: Median (P50) revenue from copula simulation, in USD.
+        expr: COPULA_P50
+        data_type: NUMBER
+
+      - name: copula_var_95
+        synonyms: ["copula VaR", "copula value at risk"]
+        description: 95% Value at Risk from copula simulation, in USD. Captures joint tail risk. This is the preferred risk metric.
+        expr: COPULA_VAR_95
+        data_type: NUMBER
+
+      - name: copula_cvar_95
+        synonyms: ["copula CVaR", "copula expected shortfall"]
+        description: 95% Conditional VaR from copula simulation, in USD. Represents average loss in the worst 5% of scenarios.
+        expr: COPULA_CVAR_95
+        data_type: NUMBER
+
+      - name: naive_p10
+        synonyms: ["naive downside", "naive P10"]
+        description: 10th percentile revenue from naive simulation, in USD.
+        expr: NAIVE_P10
+        data_type: NUMBER
+
+      - name: naive_prob_miss
+        synonyms: ["naive miss probability"]
+        description: Probability of missing revenue guidance under naive (independent) simulation.
+        expr: NAIVE_PROB_MISS
+        data_type: NUMBER
+
+      - name: var_gap_pct
+        synonyms: ["VaR gap", "risk gap"]
+        description: Percentage gap between copula and naive VaR. Computed as (copula_var - naive_var) / |naive_var| * 100. Positive means copula shows LESS tail risk than naive; negative means copula shows MORE tail risk. The sign varies by scenario — do not assume a fixed direction.
+        expr: VAR_GAP_PCT
+        data_type: NUMBER
+
+      - name: cvar_gap_pct
+        synonyms: ["CVaR gap"]
+        description: Percentage gap between copula and naive CVaR. Same sign convention as var_gap_pct.
+        expr: CVAR_GAP_PCT
+        data_type: NUMBER
+
+      - name: copula_prob_miss
+        synonyms: ["probability of miss", "miss probability"]
+        description: Probability of missing revenue guidance under copula simulation.
+        expr: COPULA_PROB_MISS
+        data_type: NUMBER
+
+      - name: copula_p10
+        synonyms: ["copula downside", "copula P10"]
+        description: 10th percentile revenue from copula simulation, in USD. Represents the downside tail with joint dependence captured.
+        expr: COPULA_P10
+        data_type: NUMBER
+
+      - name: n_paths
+        synonyms: ["simulation paths", "number of simulations"]
+        description: Number of Monte Carlo simulation paths.
+        expr: N_PATHS
+        data_type: NUMBER
+
+      - name: n_months
+        synonyms: ["forecast horizon", "horizon months"]
+        description: Number of months in the forecast horizon (typically 12).
+        expr: N_MONTHS
+        data_type: NUMBER
+
+  # ============================================
+  # MSHA_QUARRY_SITES - Competitor quarry map
+  # ============================================
+  - name: msha_quarry_sites
+    description: US quarry and mine site locations from MSHA (Mine Safety and Health Administration) public data. 10,343 active stone and sand/gravel quarries with GPS coordinates, operator names, and employee counts.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: MSHA_QUARRY_SITES
+    primary_key:
+      columns: [mine_id]
+
+    dimensions:
+      - name: mine_id
+        description: MSHA-assigned mine identification number.
+        expr: MINE_ID
+        data_type: TEXT
+
+      - name: mine_name
+        synonyms: ["quarry name", "site name"]
+        description: Name of the mine or quarry.
+        expr: MINE_NAME
+        data_type: TEXT
+
+      - name: operator_name
+        synonyms: ["operator", "company"]
+        description: Current operator name as registered with MSHA.
+        expr: OPERATOR_NAME
+        data_type: TEXT
+
+      - name: operator_group
+        synonyms: ["parent company", "competitor"]
+        description: Mapped operator group. VULCAN = our sites, MLM = Martin Marietta, CRH, HEIDELBERG, EXP = Eagle Materials, SUM = Summit.
+        expr: OPERATOR_GROUP
+        data_type: TEXT
+        sample_values: ["VULCAN", "MLM", "CRH", "HEIDELBERG", "EXP", "SUM", "ROGERS", "KNIFE_RIVER", "CEMEX", "OTHER"]
+
+      - name: state
+        synonyms: ["US state"]
+        description: US state abbreviation where the quarry is located.
+        expr: STATE
+        data_type: TEXT
+
+      - name: county
+        description: FIPS county name.
+        expr: COUNTY
+        data_type: TEXT
+
+      - name: region_code
+        synonyms: ["region"]
+        description: Mapped to SnowCore sales regions (CALIFORNIA, TEXAS, FLORIDA, etc.). OTHER for non-core states.
+        expr: REGION_CODE
+        data_type: TEXT
+
+      - name: primary_canvass
+        synonyms: ["commodity type"]
+        description: MSHA canvass code description. Stone or SandAndGravel.
+        expr: PRIMARY_CANVASS
+        data_type: TEXT
+        sample_values: ["Stone", "SandAndGravel"]
+
+      - name: mine_status
+        synonyms: ["status"]
+        description: Current mine operating status (Active or Intermittent).
+        expr: MINE_STATUS
+        data_type: TEXT
+
+    facts:
+      - name: latitude
+        description: GPS latitude of the quarry site.
+        expr: LATITUDE
+        data_type: NUMBER
+
+      - name: longitude
+        description: GPS longitude of the quarry site.
+        expr: LONGITUDE
+        data_type: NUMBER
+
+      - name: no_employees
+        synonyms: ["employees", "workforce", "headcount"]
+        description: Number of workers employed at the mine site.
+        expr: NO_EMPLOYEES
+        data_type: NUMBER
+
+    metrics:
+      - name: total_sites
+        synonyms: ["site count", "quarry count"]
+        description: Count of quarry sites.
+        expr: COUNT(msha_quarry_sites.MINE_ID)
+
+      - name: total_employees
+        description: Total employees across quarry sites.
+        expr: SUM(msha_quarry_sites.NO_EMPLOYEES)
+
+  # ============================================
+  # MONTHLY_MACRO_INDICATORS - Construction spending
+  # ============================================
+  - name: monthly_macro_indicators
+    description: Monthly macroeconomic indicators for construction spending from Census/Marketplace data. 72 rows covering total, highway, and residential construction spend.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: MONTHLY_MACRO_INDICATORS
+    primary_key:
+      columns: [indicator_id]
+
+    dimensions:
+      - name: indicator_id
+        description: Unique identifier for the macro indicator row.
+        expr: INDICATOR_ID
+        data_type: NUMBER
+
+      - name: data_source
+        description: Source of the macro data.
+        expr: DATA_SOURCE
+        data_type: TEXT
+
+    time_dimensions:
+      - name: year_month
+        synonyms: ["month", "period"]
+        description: Month of the macro data.
+        expr: YEAR_MONTH
+        data_type: DATE
+
+    facts:
+      - name: total_construction_usd
+        synonyms: ["total construction spending", "construction"]
+        description: Total US construction spending in USD.
+        expr: TOTAL_CONSTRUCTION_USD
+        data_type: NUMBER
+
+      - name: highway_construction_usd
+        synonyms: ["highway spending", "infrastructure spending", "IIJA"]
+        description: Highway and street construction spending in USD. Key driver of aggregate demand.
+        expr: HIGHWAY_CONSTRUCTION_USD
+        data_type: NUMBER
+
+      - name: residential_construction_usd
+        synonyms: ["housing", "residential spending"]
+        description: Residential construction spending in USD.
+        expr: RESIDENTIAL_CONSTRUCTION_USD
+        data_type: NUMBER
+
+    metrics:
+      - name: avg_highway_spend
+        description: Average monthly highway construction spending.
+        expr: AVG(monthly_macro_indicators.HIGHWAY_CONSTRUCTION_USD)
+
+  # ============================================
+  # MONTHLY_WEATHER_BY_REGION - Regional weather
+  # ============================================
+  - name: monthly_weather_by_region
+    description: Monthly weather data by sales region. 438 rows covering temperature, precipitation, and work days. Key driver of seasonal volume patterns.
+    base_table:
+      database: VULCAN_MATERIALS_DB
+      schema: ATOMIC
+      table: MONTHLY_WEATHER_BY_REGION
+    primary_key:
+      columns: [region_code, year_month]
 
     dimensions:
       - name: region_code
         synonyms: ["region"]
-        description: Region for the forecast.
+        description: Sales region code matching SALES_REGION.
         expr: REGION_CODE
         data_type: TEXT
 
-      - name: forecast_horizon
-        synonyms: ["horizon", "period"]
-        description: Forecast horizon (Q1, Q2, etc.).
-        expr: FORECAST_HORIZON
-        data_type: TEXT
-
     time_dimensions:
-      - name: forecast_date
-        synonyms: ["as of date"]
-        description: Date the forecast was generated.
-        expr: FORECAST_DATE
+      - name: year_month
+        synonyms: ["month", "period"]
+        description: Month of the weather observation.
+        expr: YEAR_MONTH
         data_type: DATE
 
     facts:
-      - name: predicted_revenue
-        synonyms: ["forecast revenue", "expected revenue"]
-        description: Predicted revenue in USD.
-        expr: PREDICTED_REVENUE_USD
+      - name: temp_avg_f
+        synonyms: ["average temperature", "temperature"]
+        description: Average monthly temperature in Fahrenheit.
+        expr: TEMP_AVG_F
         data_type: NUMBER
 
-      - name: predicted_volume
-        synonyms: ["forecast volume", "expected tons"]
-        description: Predicted shipment volume in tons.
-        expr: PREDICTED_VOLUME_TONS
+      - name: temp_high_avg_f
+        synonyms: ["high temperature"]
+        description: Average daily high temperature in Fahrenheit.
+        expr: TEMP_HIGH_AVG_F
         data_type: NUMBER
 
-      - name: predicted_ebitda
-        synonyms: ["forecast ebitda"]
-        description: Predicted EBITDA in USD.
-        expr: PREDICTED_EBITDA_USD
+      - name: precip_total_in
+        synonyms: ["rainfall", "precipitation"]
+        description: Total monthly precipitation in inches.
+        expr: PRECIP_TOTAL_IN
         data_type: NUMBER
 
-      - name: predicted_margin
-        synonyms: ["forecast margin"]
-        description: Predicted margin percentage.
-        expr: PREDICTED_MARGIN_PCT
+      - name: precip_days
+        synonyms: ["rain days"]
+        description: Number of days with measurable precipitation.
+        expr: PRECIP_DAYS
         data_type: NUMBER
 
-      - name: ci_low
-        synonyms: ["lower bound", "downside"]
-        description: 95% confidence interval lower bound.
-        expr: CONFIDENCE_INTERVAL_LOW
+      - name: n_weather_days
+        synonyms: ["weather work days", "work days", "operable days"]
+        description: Number of weather-suitable work days in the month. Higher = more production/delivery capacity.
+        expr: N_WEATHER_DAYS
         data_type: NUMBER
-
-      - name: ci_high
-        synonyms: ["upper bound", "upside"]
-        description: 95% confidence interval upper bound.
-        expr: CONFIDENCE_INTERVAL_HIGH
-        data_type: NUMBER
-
-      - name: p5
-        synonyms: ["5th percentile", "worst case"]
-        description: 5th percentile outcome.
-        expr: PERCENTILE_5
-        data_type: NUMBER
-
-      - name: p50
-        synonyms: ["median", "base case"]
-        description: 50th percentile (median) outcome.
-        expr: PERCENTILE_50
-        data_type: NUMBER
-
-      - name: p95
-        synonyms: ["95th percentile", "best case"]
-        description: 95th percentile outcome.
-        expr: PERCENTILE_95
-        data_type: NUMBER
-
-      - name: var_95
-        synonyms: ["value at risk", "var"]
-        description: 95% Value at Risk.
-        expr: VALUE_AT_RISK_95
-        data_type: NUMBER
-
-    metrics:
-      - name: expected_revenue
-        description: Expected (mean) revenue forecast.
-        expr: AVG(revenue_forecast.PREDICTED_REVENUE_USD)
-
-      - name: forecast_range
-        description: Width of 95% confidence interval.
-        expr: AVG(revenue_forecast.CONFIDENCE_INTERVAL_HIGH - revenue_forecast.CONFIDENCE_INTERVAL_LOW)
 
   # ============================================
-  # HIDDEN_PATTERN - Systemic risk detection
+  # MONTHLY_ENERGY_PRICE_INDEX - Energy costs
   # ============================================
-  - name: hidden_patterns
-    description: Detected systemic patterns and risks.
+  - name: monthly_energy_price_index
+    description: Monthly energy price index tracking aggregate production input costs. 72 rows. Energy is a key cost driver for asphalt/concrete.
     base_table:
       database: VULCAN_MATERIALS_DB
-      schema: ML
-      table: HIDDEN_PATTERN
+      schema: ATOMIC
+      table: MONTHLY_ENERGY_PRICE_INDEX
     primary_key:
-      columns: [PATTERN_ID]
+      columns: [year_month]
 
-    dimensions:
-      - name: pattern_type
-        synonyms: ["type", "category"]
-        description: Type of hidden pattern.
-        expr: PATTERN_TYPE
-        data_type: TEXT
-        sample_values: ["COST_CORRELATION", "WEATHER_CLUSTERING", "DEMAND_SHIFT"]
-
-      - name: pattern_name
-        synonyms: ["name", "pattern"]
-        description: Name of the pattern.
-        expr: PATTERN_NAME
-        data_type: TEXT
-
-      - name: severity
-        synonyms: ["risk level", "priority"]
-        description: Severity of the pattern.
-        expr: SEVERITY
-        data_type: TEXT
-        sample_values: ["HIGH", "MEDIUM", "LOW"]
-
-      - name: status
-        description: Current status.
-        expr: STATUS
-        data_type: TEXT
+    time_dimensions:
+      - name: year_month
+        synonyms: ["month", "period"]
+        description: Month of the energy price index.
+        expr: YEAR_MONTH
+        data_type: DATE
 
     facts:
-      - name: annual_impact
-        synonyms: ["impact", "exposure"]
-        description: Estimated annual financial impact in USD.
-        expr: ESTIMATED_ANNUAL_IMPACT_USD
+      - name: energy_price_index
+        synonyms: ["energy index", "energy cost", "EPI"]
+        description: Composite energy price index. Higher values indicate rising energy costs which compress margins on asphalt and concrete.
+        expr: ENERGY_PRICE_INDEX
         data_type: NUMBER
 
-      - name: confidence
-        synonyms: ["statistical significance"]
-        description: Statistical confidence of the pattern (0-1).
-        expr: STATISTICAL_SIGNIFICANCE
-        data_type: NUMBER
+    dimensions:
+      - name: data_source
+        description: Source of the energy price data.
+        expr: DATA_SOURCE
+        data_type: TEXT
 
-    metrics:
-      - name: total_exposure
-        description: Total annual exposure from all patterns.
-        expr: SUM(hidden_patterns.ESTIMATED_ANNUAL_IMPACT_USD)
-
-      - name: high_severity_count
-        description: Count of high severity patterns.
-        expr: SUM(CASE WHEN hidden_patterns.SEVERITY = 'HIGH' THEN 1 ELSE 0 END)
 
 # ============================================
 # RELATIONSHIPS
 # ============================================
 relationships:
-  - name: shipments_to_pricing
+  - name: shipments_to_regions
     left_table: monthly_shipments
-    right_table: monthly_pricing
+    right_table: sales_regions
+    relationship_columns:
+      - left_column: REGION_CODE
+        right_column: REGION_CODE
+
+  - name: shipments_to_product_segment
+    left_table: monthly_shipments
+    right_table: product_segment
+    relationship_columns:
+      - left_column: PRODUCT_SEGMENT_CODE
+        right_column: SEGMENT_CODE
+
+  - name: elasticity_to_shipments
+    left_table: price_elasticity
+    right_table: monthly_shipments
+    relationship_columns:
+      - left_column: PRODUCT_SEGMENT_CODE
+        right_column: PRODUCT_SEGMENT_CODE
+
+  - name: optimal_pricing_to_shipments
+    left_table: optimal_pricing
+    right_table: monthly_shipments
+    relationship_columns:
+      - left_column: REGION_CODE
+        right_column: REGION_CODE
+      - left_column: PRODUCT_SEGMENT_CODE
+        right_column: PRODUCT_SEGMENT_CODE
+
+  - name: quarry_sites_to_regions
+    left_table: msha_quarry_sites
+    right_table: sales_regions
+    relationship_columns:
+      - left_column: REGION_CODE
+        right_column: REGION_CODE
+
+  - name: cross_elasticity_product_i
+    left_table: elasticity_matrix
+    right_table: monthly_shipments
+    relationship_columns:
+      - left_column: PRODUCT_I
+        right_column: PRODUCT_SEGMENT_CODE
+
+  - name: weather_to_shipments
+    left_table: monthly_weather_by_region
+    right_table: monthly_shipments
     relationship_columns:
       - left_column: REGION_CODE
         right_column: REGION_CODE
       - left_column: YEAR_MONTH
         right_column: YEAR_MONTH
 
-  - name: shipments_to_regions
-    left_table: monthly_shipments
+  - name: macro_to_shipments
+    left_table: monthly_macro_indicators
+    right_table: monthly_shipments
+    relationship_columns:
+      - left_column: YEAR_MONTH
+        right_column: YEAR_MONTH
+
+  - name: weather_to_regions
+    left_table: monthly_weather_by_region
     right_table: sales_regions
     relationship_columns:
       - left_column: REGION_CODE
@@ -481,110 +937,293 @@ verified_queries:
       WHERE YEAR_MONTH >= DATE_TRUNC('year', CURRENT_DATE())
       GROUP BY YEAR(YEAR_MONTH)
 
-  - name: margin_by_region
-    question: "What is the cash gross profit per ton by region?"
-    use_as_onboarding_question: true
-    sql: |
-      SELECT 
-        REGION_CODE as region,
-        AVG(FREIGHT_ADJUSTED_PRICE) as avg_price_per_ton,
-        AVG(CASH_GROSS_PROFIT_PER_TON) as cash_gp_per_ton,
-        AVG(CASH_GROSS_PROFIT_PER_TON / NULLIF(FREIGHT_ADJUSTED_PRICE, 0)) * 100 as margin_pct
-      FROM __monthly_pricing
-      WHERE YEAR_MONTH >= DATEADD('month', -6, CURRENT_DATE())
-      GROUP BY REGION_CODE
-      ORDER BY cash_gp_per_ton DESC
-
   - name: segment_mix
-    question: "What is the customer segment mix?"
+    question: "What is the product segment mix?"
     sql: |
       SELECT 
-        CUSTOMER_SEGMENT_CODE as segment,
+        PRODUCT_SEGMENT_CODE as segment,
         SUM(SHIPMENT_TONS) as total_tons,
         SUM(REVENUE_USD) as total_revenue,
         SUM(REVENUE_USD) / NULLIF(SUM(SUM(REVENUE_USD)) OVER (), 0) * 100 as revenue_share_pct
       FROM __monthly_shipments
       WHERE YEAR_MONTH >= DATEADD('year', -1, CURRENT_DATE())
-      GROUP BY CUSTOMER_SEGMENT_CODE
+      GROUP BY PRODUCT_SEGMENT_CODE
       ORDER BY total_revenue DESC
 
-  - name: revenue_forecast
-    question: "What is the revenue forecast?"
-    use_as_onboarding_question: true
-    sql: |
-      SELECT 
-        FORECAST_HORIZON,
-        REGION_CODE,
-        PREDICTED_REVENUE_USD / 1e9 as predicted_revenue_b,
-        PERCENTILE_5 / 1e9 as p5_b,
-        PERCENTILE_50 / 1e9 as p50_b,
-        PERCENTILE_95 / 1e9 as p95_b,
-        PREDICTED_MARGIN_PCT
-      FROM __revenue_forecast
-      WHERE FORECAST_DATE = (SELECT MAX(FORECAST_DATE) FROM VULCAN_MATERIALS_DB.ML.REVENUE_FORECAST)
-      ORDER BY FORECAST_HORIZON, REGION_CODE
 
-  - name: hidden_discovery
-    question: "What are the hidden patterns?"
-    sql: |
-      SELECT 
-        PATTERN_NAME,
-        PATTERN_TYPE,
-        SEVERITY,
-        ESTIMATED_ANNUAL_IMPACT_USD / 1e6 as annual_impact_millions,
-        STATISTICAL_SIGNIFICANCE as confidence,
-        ROOT_CAUSE_HYPOTHESIS,
-        RECOMMENDED_ACTION
-      FROM __hidden_patterns
-      WHERE STATUS != 'RESOLVED'
-      ORDER BY ESTIMATED_ANNUAL_IMPACT_USD DESC
-
-  - name: diesel_trend
-    question: "What is the diesel price trend?"
+  - name: gas_price_trend
+    question: "What is the natural gas price trend?"
     sql: |
       SELECT 
         DATE_TRUNC('week', PRICE_DATE) as week,
-        AVG(DIESEL_GULF_COAST) as avg_diesel_price,
-        AVG(LIQUID_ASPHALT_GULF) as avg_asphalt_price
+        AVG(NATURAL_GAS_HENRY_HUB) as avg_gas_price,
+        MIN(NATURAL_GAS_HENRY_HUB) as min_gas,
+        MAX(NATURAL_GAS_HENRY_HUB) as max_gas
       FROM __commodity_prices
       WHERE PRICE_DATE >= DATEADD('month', -6, CURRENT_DATE())
+        AND NATURAL_GAS_HENRY_HUB IS NOT NULL
       GROUP BY DATE_TRUNC('week', PRICE_DATE)
       ORDER BY week DESC
+
+  - name: elasticity_by_product
+    question: "What is the price elasticity for each product?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT
+        PRODUCT_SEGMENT_CODE as product,
+        OWN_ELASTICITY as elasticity,
+        R_SQUARED as model_fit,
+        CASE
+          WHEN ABS(OWN_ELASTICITY) < 1 THEN 'INELASTIC - Pricing Power'
+          ELSE 'ELASTIC - Volume Risk'
+        END as interpretation,
+        MODEL_VERSION
+      FROM __price_elasticity
+      WHERE REGION_CODE = 'ALL'
+      ORDER BY ABS(OWN_ELASTICITY) DESC
+
+  - name: product_substitutes
+    question: "Which products are substitutes vs complements?"
+    sql: |
+      SELECT
+        PRODUCT_I as product_affected,
+        PRODUCT_J as price_changed_product,
+        CROSS_ELASTICITY,
+        RELATIONSHIP_TYPE,
+        P_VALUE
+      FROM __elasticity_matrix
+      WHERE PRODUCT_I != PRODUCT_J
+      ORDER BY ABS(CROSS_ELASTICITY) DESC
+
+  - name: pricing_opportunity
+    question: "How much profit are we leaving on the table?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT
+        REGION_CODE as region,
+        PRODUCT_SEGMENT_CODE as product,
+        CURRENT_PRICE,
+        OPTIMAL_PRICE,
+        PRICE_DELTA_PCT * 100 as price_change_pct,
+        PROFIT_DELTA / 1e6 as profit_opportunity_millions,
+        OPTIMIZER_STATUS
+      FROM __optimal_pricing
+      WHERE MODEL_VERSION = (SELECT MAX(MODEL_VERSION) FROM __optimal_pricing)
+        AND OPTIMIZER_STATUS = 'Optimization terminated successfully'
+      ORDER BY PROFIT_DELTA DESC
+
+  - name: copula_vs_naive_risk
+    question: "How does copula VaR compare to naive VaR?"
+    use_as_onboarding_question: true
+    sql: |
+      SELECT
+        SCENARIO_ID,
+        NAIVE_P50 / 1e9 as naive_median_b,
+        COPULA_P50 / 1e9 as copula_median_b,
+        NAIVE_VAR_95 / 1e9 as naive_var_b,
+        COPULA_VAR_95 / 1e9 as copula_var_b,
+        VAR_GAP_PCT as var_gap_pct,
+        NAIVE_CVAR_95 / 1e9 as naive_cvar_b,
+        COPULA_CVAR_95 / 1e9 as copula_cvar_b,
+        CVAR_GAP_PCT as cvar_gap_pct,
+        N_PATHS as simulation_paths
+      FROM __model_comparison
+      ORDER BY SCENARIO_ID
+
+  - name: demand_drivers
+    question: "What are the key demand drivers by region?"
+    sql: |
+      SELECT
+        ms.REGION_CODE as region,
+        ms.YEAR_MONTH,
+        SUM(ms.SHIPMENT_TONS) as volume_tons,
+        SUM(ms.REVENUE_USD) as revenue_usd,
+        m.HIGHWAY_CONSTRUCTION_USD / 1e9 as highway_spend_b,
+        m.RESIDENTIAL_CONSTRUCTION_USD / 1e9 as residential_spend_b,
+        w.TEMP_AVG_F as avg_temp_f,
+        w.PRECIP_DAYS as rain_days,
+        w.N_WEATHER_DAYS as work_days,
+        e.ENERGY_PRICE_INDEX as energy_index
+      FROM __monthly_shipments ms
+      LEFT JOIN __monthly_macro_indicators m ON ms.YEAR_MONTH = m.YEAR_MONTH
+      LEFT JOIN __monthly_weather_by_region w ON ms.YEAR_MONTH = w.YEAR_MONTH AND ms.REGION_CODE = w.REGION_CODE
+      LEFT JOIN __monthly_energy_price_index e ON ms.YEAR_MONTH = e.YEAR_MONTH
+      WHERE ms.YEAR_MONTH >= DATEADD('month', -6, CURRENT_DATE())
+        AND ms.YEAR_MONTH <= (SELECT MAX(YEAR_MONTH) FROM __monthly_macro_indicators)
+      GROUP BY ms.REGION_CODE, ms.YEAR_MONTH, m.HIGHWAY_CONSTRUCTION_USD, m.RESIDENTIAL_CONSTRUCTION_USD,
+               w.TEMP_AVG_F, w.PRECIP_DAYS, w.N_WEATHER_DAYS, e.ENERGY_PRICE_INDEX
+      ORDER BY ms.YEAR_MONTH DESC, volume_tons DESC
+
+  - name: weather_impact_by_region
+    question: "How does weather affect shipment volume by region?"
+    sql: |
+      SELECT
+        w.REGION_CODE as region,
+        DATE_TRUNC('quarter', w.YEAR_MONTH) as quarter,
+        AVG(w.PRECIP_DAYS) as avg_rain_days,
+        AVG(w.N_WEATHER_DAYS) as avg_work_days,
+        AVG(w.TEMP_AVG_F) as avg_temp_f,
+        SUM(ms.SHIPMENT_TONS) as total_tons
+      FROM __monthly_weather_by_region w
+      JOIN __monthly_shipments ms ON w.YEAR_MONTH = ms.YEAR_MONTH AND w.REGION_CODE = ms.REGION_CODE
+      GROUP BY w.REGION_CODE, DATE_TRUNC('quarter', w.YEAR_MONTH)
+      ORDER BY quarter DESC, total_tons DESC
+
+  - name: construction_spending_trend
+    question: "What is the construction spending trend?"
+    sql: |
+      SELECT
+        YEAR_MONTH,
+        TOTAL_CONSTRUCTION_USD / 1e9 as total_construction_b,
+        HIGHWAY_CONSTRUCTION_USD / 1e9 as highway_b,
+        RESIDENTIAL_CONSTRUCTION_USD / 1e9 as residential_b
+      FROM __monthly_macro_indicators
+      ORDER BY YEAR_MONTH DESC
+
+  - name: copula_tail_risk
+    question: "What is the tail dependence in the copula model?"
+    sql: |
+      SELECT
+        COPULA_TYPE,
+        MODEL_VERSION,
+        TAIL_DEPENDENCE_LOWER as lower_tail,
+        TAIL_DEPENDENCE_UPPER as upper_tail,
+        AIC,
+        BIC,
+        N_OBSERVATIONS,
+        CASE
+          WHEN TAIL_DEPENDENCE_LOWER > 0.1 THEN 'Significant tail dependence - joint crashes likely'
+          WHEN TAIL_DEPENDENCE_LOWER > 0 THEN 'Mild tail dependence'
+          ELSE 'Zero tail dependence (Gaussian copula)'
+        END as tail_risk_assessment
+      FROM __copula_parameters
+      ORDER BY MODEL_VERSION DESC
+
+  - name: competitor_quarry_count
+    question: "How many quarries does each competitor have?"
+    sql: |
+      SELECT
+        OPERATOR_GROUP as competitor,
+        COUNT(*) as quarry_sites,
+        SUM(NO_EMPLOYEES) as total_employees,
+        COUNT(DISTINCT STATE) as states_present
+      FROM __msha_quarry_sites
+      WHERE OPERATOR_GROUP != 'OTHER'
+      GROUP BY OPERATOR_GROUP
+      ORDER BY quarry_sites DESC
+
+  - name: competitor_sites_by_state
+    question: "Where are competitor quarries in Texas?"
+    sql: |
+      SELECT
+        OPERATOR_GROUP as competitor,
+        MINE_NAME as quarry,
+        COUNTY,
+        LATITUDE,
+        LONGITUDE,
+        NO_EMPLOYEES as employees,
+        PRIMARY_CANVASS as commodity
+      FROM __msha_quarry_sites
+      WHERE STATE = 'TX'
+        AND OPERATOR_GROUP != 'OTHER'
+      ORDER BY OPERATOR_GROUP, NO_EMPLOYEES DESC
+
+  - name: revenue_by_product
+    question: "What is revenue by product line?"
+    sql: |
+      SELECT
+        ms.PRODUCT_SEGMENT_CODE as product_code,
+        ps.SEGMENT_NAME as product_name,
+        ps.SEGMENT_TYPE as category,
+        SUM(ms.REVENUE_USD) / 1e9 as revenue_b,
+        SUM(ms.SHIPMENT_TONS) / 1e6 as volume_m_tons,
+        SUM(ms.REVENUE_USD) / NULLIF(SUM(ms.SHIPMENT_TONS), 0) as avg_price_per_ton
+      FROM __monthly_shipments ms
+      JOIN __product_segment ps ON ms.PRODUCT_SEGMENT_CODE = ps.SEGMENT_CODE
+      WHERE ms.YEAR_MONTH >= DATEADD('year', -1, CURRENT_DATE())
+      GROUP BY ms.PRODUCT_SEGMENT_CODE, ps.SEGMENT_NAME, ps.SEGMENT_TYPE
+      ORDER BY revenue_b DESC
+
+  - name: stone_elasticity
+    question: "How elastic is crushed stone demand?"
+    sql: |
+      SELECT
+        PRODUCT_SEGMENT_CODE as product,
+        OWN_ELASTICITY as elasticity,
+        STANDARD_ERROR,
+        R_SQUARED as model_fit,
+        N_OBSERVATIONS as sample_size,
+        MODEL_VERSION,
+        CASE
+          WHEN ABS(OWN_ELASTICITY) < 1 THEN 'INELASTIC - Can raise prices with limited volume loss'
+          ELSE 'ELASTIC - Price increases risk significant volume decline'
+        END as business_implication
+      FROM __price_elasticity
+      WHERE PRODUCT_SEGMENT_CODE = 'AGG_STONE'
+        AND REGION_CODE = 'ALL'
+
+  - name: miss_probability
+    question: "What is the probability we miss guidance?"
+    sql: |
+      SELECT
+        SCENARIO_ID,
+        COPULA_PROB_MISS as copula_miss_probability,
+        NAIVE_PROB_MISS as naive_miss_probability,
+        COPULA_P50 / 1e9 as copula_expected_revenue_b,
+        N_PATHS as simulation_paths,
+        N_MONTHS as forecast_months
+      FROM __model_comparison
+      ORDER BY SCENARIO_ID
 
 # ============================================
 # CUSTOM INSTRUCTIONS
 # ============================================
 custom_instructions: >
-  This semantic model covers Vulcan Materials revenue forecasting and analysis.
+  This semantic model covers SnowCore Materials (Vulcan) revenue intelligence.
   
   Key business context:
-  - Vulcan Materials is the largest US producer of construction aggregates
-  - FY2025: $7.941B revenue, 226.8M tons shipped, $21.98/ton freight-adjusted price
-  - Cash gross profit per ton: $11.33 (key margin metric, excludes D&D)
-  - Regions: TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS
-  - SAC TUN (Mexico) operations suspended - $80-100M annual EBITDA impact
+  - SnowCore Materials is the largest US producer of construction aggregates
+  - FY2025: ~$7.9B revenue, ~227M tons shipped, ~$21.98/ton freight-adjusted price
+  - 6 product lines: AGG_STONE (~47%), AGG_SAND (~20%), AGG_SPECIALTY (~13%), ASPHALT_MIX (~11%), CONCRETE_RMX (~7%), SERVICE_LOGISTICS (~2%)
+  - 7 sales regions: TEXAS, SOUTHEAST, FLORIDA, CALIFORNIA, VIRGINIA, ILLINOIS, MEXICO
   
-  Customer Segments:
-  - PUBLIC_HIGHWAY (35%): State DOT projects, IIJA-funded
-  - PRIVATE_RESIDENTIAL (22%): Housing, affected by mortgage rates
-  - PRIVATE_COMMERCIAL (18%): Office, retail, data centers
-  - PUBLIC_OTHER (12%): Municipal infrastructure
-  - PRIVATE_INDUSTRIAL (8%): Manufacturing, reshoring
+  Revenue Decomposition (CRITICAL):
+  - Revenue = Price × Volume × Product Mix. Always decompose when analyzing revenue changes.
+  - When comparing periods, attribute changes to: price effect + volume effect + mix effect.
   
-  Monte Carlo Forecasting:
-  - Forecasts generated via 10,000+ simulations
-  - Key uncertain variables: volume growth, price growth, diesel/asphalt costs
-  - P5/P50/P95 represent 5th, 50th, 95th percentile outcomes
-  - Value at Risk (VaR) = potential loss at 95% confidence
+  Elasticity Interpretation:
+  - |elasticity| < 1 = INELASTIC = pricing power (can raise prices with limited volume loss)
+  - |elasticity| > 1 = ELASTIC = volume risk (price increases significantly reduce demand)
+  - Cross-elasticity > 0 = SUBSTITUTES (stone vs sand), < 0 = COMPLEMENTS (aggregates and asphalt)
+  - Warn when R-squared < 0.3 (low confidence in the elasticity estimate)
   
-  Hidden Discovery Patterns:
-  - COST_CORRELATION: Diesel-asphalt cost double squeeze
-  - WEATHER_CLUSTERING: Seasonal precipitation patterns
-  - DEMAND_SHIFT: Data center aggregate intensity
+  Risk Analytics (Copula vs Naive):
+  - ALWAYS present copula-based VaR/CVaR as the PRIMARY risk metric
+  - Copula captures joint dependence (e.g., diesel spike + construction slowdown + bad weather simultaneously)
+  - VaR = "the most we'd lose in 19 out of 20 quarters"
+  - CVaR = "if we DO have a bad quarter, the average loss"
+  - VAR_GAP_PCT sign varies by scenario: negative means copula shows MORE risk, positive means copula shows LESS risk. Always show actual data — do not assume a fixed direction.
+  - BASE_CASE (v1): var_gap = -2.16% (copula worse). BASE_CASE_V2: var_gap = +0.72% (copula better). Present both and let the data speak.
   
-  When analyzing:
+  Competitor Intelligence:
+  - MSHA data covers 10,343 active quarries in the US with GPS coordinates
+  - Major competitors: Martin Marietta (MLM, 269 sites), SnowCore/Vulcan (193), Heidelberg (145), CRH (42)
+  - Aggregates delivery radius is ~50 miles — local market share matters more than national
+  
+  Pricing Optimization:
+  - Constraints: margin floor 15%, price change ±10%, capacity cap 95%, competitor parity ±5%
+  - Optimizer runs SLSQP via stored procedure ML.SP_OPTIMIZE_PRICING
+  - profit_delta shows the incremental profit from moving to optimal prices
+  - WARNING: In v2, only 18 of 36 optimizer runs converged. In v1, all 36 converged. Always filter by OPTIMIZER_STATUS = 'Optimization terminated successfully'. Non-converged rows show boundary PRICE_DELTA_PCT values (±10%) and should be excluded or flagged.
+  
+  Seasonality and Weather:
   - Volume is seasonal: Q2-Q3 peak, Q1/Q4 trough
-  - Price increases typically 4-5% annually
+  - Price increases typically 4-5% annually, announced in January
   - Weather impacts vary by region (Southeast Q1 rain, Texas summer heat)
-  - Public sector provides stable demand floor
-  - Private sector more cyclical (interest rate sensitive)
+  - Public sector (IIJA-funded highway) provides stable demand floor
+  
+  Data Coverage:
+  - All monthly tables use first-of-month date convention (2025-10-01 = October 2025)
+  - Shipments: Jan 2020 – Feb 2026. Weather: Jan 2020 – Jan 2026. Macro/Energy: Jan 2020 – Dec 2025.
+  - When joining shipments to macro or energy for recent months (Jan–Feb 2026), expect NULLs — macro/energy data lags 2 months.
+  - Always use LEFT JOIN when combining shipments with macro/weather/energy to avoid dropping shipment rows.

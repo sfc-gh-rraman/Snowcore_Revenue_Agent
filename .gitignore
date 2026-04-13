@@ -23,3 +23,7 @@ frontend/dist/
 
 # Logs
 *.log
+
+# Large data files
+data/msha/Mines.txt
+data/msha/Mines.zip

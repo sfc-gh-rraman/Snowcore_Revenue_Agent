@@ -55,7 +55,7 @@ const parameters = [
     id: 'highway_growth', 
     name: 'Highway Growth', 
     description: 'Infrastructure multiplier',
-    fullDescription: 'Growth rate modifier for the highway/infrastructure segment (~35% of Vulcan revenue). Reflects DOT budgets, federal infrastructure spending (IIJA), and state highway programs.',
+    fullDescription: 'Growth rate modifier for the highway/infrastructure segment (~35% of SnowCore revenue). Reflects DOT budgets, federal infrastructure spending (IIJA), and state highway programs.',
     businessImpact: 'Highway segment is most sensitive to government policy. IIJA provides multi-year visibility. Each 5% change in highway growth impacts total revenue by ~1.75% (35% × 5%).',
     min: -0.10,
     max: 0.20,

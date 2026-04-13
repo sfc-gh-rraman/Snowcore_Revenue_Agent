@@ -1,0 +1,19 @@
+database: VULCAN_MATERIALS_DB
+schema: ML
+name: SNOWCORE_REVENUE_AGENT
+created: 2026-04-06
+purpose: SnowCore Materials Revenue Intelligence Agent - unified agent with 4 tools for revenue analytics, competitor intelligence, scenario search, and pricing optimization
+tools:
+  - name: revenue_analyst
+    type: cortex_analyst_text_to_sql
+    resource: "@VULCAN_MATERIALS_DB.ML.SEMANTIC_MODELS/vulcan_revenue_model.yaml"
+  - name: competitor_intel_search
+    type: cortex_search
+    resource: VULCAN_MATERIALS_DB.DOCS.COMPETITOR_INTEL_SEARCH
+  - name: scenario_search
+    type: cortex_search
+    resource: VULCAN_MATERIALS_DB.ML.SCENARIO_SEARCH_SERVICE
+  - name: run_pricing_optimizer
+    type: generic
+    resource: VULCAN_MATERIALS_DB.ML.SP_OPTIMIZE_PRICING
+status: staging
